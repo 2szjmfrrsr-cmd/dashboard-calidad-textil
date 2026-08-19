@@ -31,6 +31,47 @@
 .batch-list{display:flex;flex-direction:column;gap:4px}.batch-row{display:grid;grid-template-columns:24px 24px minmax(130px,1fr) 105px 78px 86px 34px;gap:8px;padding:10px 4px;border-bottom:1px solid #edf2f5;align-items:center;font-size:11px;transition:background .15s}.batch-row:hover{background:#f7fafc}.batch-row.multi-event{background:linear-gradient(90deg,#fffaf0,#fff)}.batch-row .rankno{font-weight:900;color:#183f5d}.batch-row .chev{font-size:16px;color:#4e6f88;cursor:pointer;text-align:center}.batch-row .batch-name{font-weight:800}.batch-row .kg{text-align:right;font-weight:900}.rework-count{justify-self:center;min-width:28px;padding:4px 7px;border-radius:9px;text-align:center;font-weight:900;background:#eef4f7;color:#2a6688}.rework-count.warn{background:#fff1d5;color:#a66b00}.rework-count.alert{background:#ffe4e4;color:#b83e3e}.batch-detail{margin:0 0 6px 48px;padding:10px 12px;background:#f8fafb;border:1px solid #dce7ee;border-radius:10px;display:none}.batch-detail.open{display:block}.batch-detail-title{font-size:11px;font-weight:900;color:#183f5d;margin-bottom:8px}.batch-events{display:grid;grid-template-columns:34px 88px minmax(120px,1.3fr) 110px minmax(95px,1fr) 82px;gap:7px;align-items:center;font-size:10px}.batch-events.head{color:#6a8195;font-weight:800;text-transform:uppercase;font-size:9px;padding-bottom:5px;border-bottom:1px solid #dfe8ee}.batch-events.row{padding:7px 0;border-bottom:1px solid #e8eef2}.batch-events.row:last-child{border-bottom:0}.event-kg{text-align:right;font-weight:800}.event-result{justify-self:start;padding:3px 7px;border-radius:8px;background:#fff0d2;color:#9a6700;font-weight:800;font-size:9px}.batch-total{margin-top:8px;display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid #dce7ee;font-size:10px;font-weight:900;color:#183f5d}.detail-btn{border:1px solid #cbdbe5;background:#fff;border-radius:7px;width:28px;height:28px;cursor:pointer;color:#275b7c;font-weight:900}.detail-btn:hover{background:#edf5f8}.batch-head{display:grid;grid-template-columns:24px 24px minmax(130px,1fr) 105px 78px 86px 34px;gap:8px;padding:0 4px 6px;color:#6a8195;font-size:9px;font-weight:800;text-transform:uppercase}.batch-head span:nth-child(4){text-align:right}.batch-head span:nth-child(5){text-align:center}
 .rank{display:grid;grid-template-columns:24px 1fr 100px 75px;gap:8px;padding:8px 2px;border-bottom:1px solid #edf2f5;font-size:11px;align-items:center}.rank .kg{text-align:right;font-weight:800}.badge{padding:3px 7px;border-radius:8px;background:#eef4f7;color:#2a6688;font-size:9px;font-weight:800}.loading{position:fixed;inset:0;background:rgba(244,247,249,.92);z-index:99;display:flex;align-items:center;justify-content:center;font-weight:800;color:#214e6c}.error{margin:15px 0;background:#fff1f1;border:1px solid #f0b6b6;color:#a73e3e;padding:14px;border-radius:12px;display:none}
 @media(max-width:1200px){.kpis{grid-template-columns:repeat(3,1fr)}.filtergrid{grid-template-columns:repeat(4,1fr)}}@media(max-width:760px){.wrap{padding:9px}.hero{padding:18px;min-height:88px}.hero-main{gap:12px}.hero-icon{width:43px;height:43px;border-radius:12px;font-size:23px}.hero-copy h1{font-size:20px}.hero-copy p{font-size:11px}.hero-accent{right:-20%;width:260px}.filtergrid,.kpis,.grid2,.grid3{grid-template-columns:1fr}.canvasbox,.canvasbox.tall{height:260px}.kpi{min-height:180px}}
+
+/* Resumen visual de meses seleccionados */
+.month-chip-summary{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-width:0;
+  overflow:hidden;
+  white-space:nowrap;
+}
+.month-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:4px 9px;
+  border-radius:999px;
+  background:#eaf3fb;
+  color:#164b70;
+  border:1px solid #d5e7f5;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.2;
+}
+.month-chip .chip-x{
+  color:#6c8ba3;
+  font-size:12px;
+}
+.month-chip-more{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:30px;
+  height:24px;
+  padding:0 8px;
+  border-radius:999px;
+  background:#1f6fb2;
+  color:#fff;
+  font-size:12px;
+  font-weight:800;
+}
+
 </style>
 </head>
 <body>
@@ -167,4 +208,58 @@ function apply(){const [lf,rf]=filters();renderKpis(lf,rf);renderCharts(lf,rf);$
 function populate(){const dates=LIB.map(r=>iso(r.FECHA)).filter(Boolean);$('from').value=Math.min(...dates.map(Number).map(n=>n))?dates.sort()[0]:'';$('to').value=dates.sort().slice(-1)[0]||'';setupFilter(document.querySelector('[data-key="months"]'),'months',LIB.map(r=>r.MES),'Todos los meses',monthLabel);setupFilter(document.querySelector('[data-key="weeks"]'),'weeks',unique([...LIB.map(r=>r.SEMANA),...REJ.map(r=>r.SEMANA)]),'Todas las semanas');setupFilter(document.querySelector('[data-key="clients"]'),'clients',unique([...LIB.map(r=>r.CLIENTE),...REJ.map(r=>r.CLIENTE)]),'Todos');setupFilter(document.querySelector('[data-key="areas"]'),'areas',REJ.map(r=>r['AREA RESPONSABLE']),'Todas');setupFilter(document.querySelector('[data-key="causes"]'),'causes',REJ.map(r=>r.CAUSA),'Todas');setupFilter(document.querySelector('[data-key="telas"]'),'telas',unique([...LIB.map(r=>r.TELA),...REJ.map(r=>r.TELA)]),'Todas');document.querySelectorAll('input[type=date]').forEach(i=>i.onchange=apply);$('reset').onclick=()=>{document.querySelectorAll('.options input').forEach(i=>i.checked=false);Object.keys(state).forEach(k=>state[k].clear());document.querySelectorAll('.multi').forEach(el=>{el.querySelector('.selcount').textContent='Sin selección'});$('from').value=dates.sort()[0];$('to').value=dates.sort().slice(-1)[0];apply()};document.addEventListener('click',e=>{if(!e.target.closest('.multi'))document.querySelectorAll('.multi.open').forEach(x=>{x.classList.remove('open');x.querySelector('.selectbtn').classList.remove('open')})});apply()}
 async function load(){try{const res=await fetch(DATA_URL+'?v='+Date.now());if(!res.ok)throw new Error('No se pudo cargar '+DATA_URL+' ('+res.status+')');const ab=await res.arrayBuffer();const wb=XLSX.read(ab,{type:'array',cellDates:true});const lr=XLSX.utils.sheet_to_json(wb.Sheets['LIBERADOS'],{defval:null});const rr=XLSX.utils.sheet_to_json(wb.Sheets['RECHAZOS'],{defval:null});LIB=lr;REJ=rr;populate();$('loading').style.display='none'}catch(e){console.error(e);$('loading').style.display='none';$('error').style.display='block';$('error').textContent='No fue posible cargar el archivo maestro. Verifica que DATA_DASHBOARD_CALIDAD_2026.xlsx esté en la raíz del repositorio y que el nombre sea exactamente igual. '+e.message}}
 load();
-</script></body></html>
+</script>
+<script>
+(function(){
+  const MONTH_NAMES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  function monthLabel(v){
+    const s=String(v??'');
+    const m=s.match(/^(\d{4})-(\d{1,2})$/);
+    if(!m) return s;
+    const i=Number(m[2])-1;
+    return i>=0 && i<12 ? MONTH_NAMES[i]+' · '+m[1] : s;
+  }
+  function updateMonthChips(){
+    const summary=document.querySelector('[data-month-summary]');
+    if(!summary) return;
+    const root=summary.closest('div');
+    if(!root) return;
+    const checks=[...root.querySelectorAll('input[type="checkbox"]')];
+    const selected=checks.filter(x=>x.checked).map(x=>{
+      const row=x.closest('label,li,div');
+      const txt=(row?.innerText||x.value||'').trim();
+      return monthLabel(txt);
+    }).filter(Boolean);
+
+    summary.innerHTML='';
+    if(selected.length===0){
+      summary.textContent='Todos los meses';
+      return;
+    }
+    const shown=selected.slice(0,2);
+    shown.forEach((name)=>{
+      const chip=document.createElement('span');
+      chip.className='month-chip';
+      chip.innerHTML='<span>'+name+'</span><span class="chip-x">×</span>';
+      summary.appendChild(chip);
+    });
+    if(selected.length>2){
+      const more=document.createElement('span');
+      more.className='month-chip-more';
+      more.textContent='+'+(selected.length-2);
+      summary.appendChild(more);
+    }
+  }
+  document.addEventListener('change', function(e){
+    if(e.target.matches('input[type="checkbox"]')) setTimeout(updateMonthChips,0);
+  });
+  document.addEventListener('click', function(){
+    setTimeout(updateMonthChips,50);
+  });
+  window.addEventListener('load', function(){
+    setTimeout(updateMonthChips,300);
+  });
+})();
+</script>
+
+</body></html>
