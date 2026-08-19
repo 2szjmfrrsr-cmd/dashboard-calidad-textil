@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V5 PARETO Y TABLA ALINEADOS -->
 <!-- VERSION: V4 FIX bt NOT DEFINED -->
 <!-- VERSION: V3 ESTRUCTURA CORREGIDA - TODO DENTRO DE WRAP -->
 <!-- VERSION: FIX ERROR NULL + TREND LAYOUT + NATIVE DATA LABELS -->
@@ -225,6 +226,51 @@
 .canvasbox canvas{display:block;width:100%!important;height:100%!important}
 @media(max-width:900px){
   .grid2{grid-template-columns:1fr!important}
+}
+
+
+/* === AJUSTE FINAL: PARETO Y TABLA CON LA MISMA ALTURA === */
+.executive-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 300px;
+  align-items:stretch!important;
+}
+.executive-layout .pareto-chart-wrap{
+  display:flex!important;
+  flex-direction:column!important;
+  height:100%!important;
+  min-height:0!important;
+}
+.executive-layout .executive-canvas{
+  flex:1 1 auto!important;
+  height:auto!important;
+  min-height:0!important;
+}
+.executive-layout .executive-canvas canvas{
+  height:100%!important;
+}
+.executive-layout .executive-ranking{
+  height:auto!important;
+  min-height:0!important;
+  box-sizing:border-box!important;
+}
+.executive-layout .attack-zone-note{
+  flex:0 0 auto!important;
+}
+@media(max-width:1000px){
+  .executive-layout{
+    grid-template-columns:1fr!important;
+  }
+  .executive-layout .pareto-chart-wrap{
+    height:auto!important;
+  }
+  .executive-layout .executive-canvas{
+    height:380px!important;
+    flex:none!important;
+  }
+  .executive-layout .executive-ranking{
+    height:auto!important;
+  }
 }
 
 </style>
