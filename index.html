@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V17 SOLO 2 GRAFICAS EN FILA -->
 <!-- VERSION: V16 KG RECHAZADOS EN KILOS -->
 <!-- VERSION: V15 META LINE IN MONTHLY TREND -->
 <!-- VERSION: V14 DONUT INNER TEXT FIX -->
@@ -799,6 +800,28 @@
   box-shadow:0 1px 3px rgba(0,0,0,.08)!important;
 }
 
+
+/* === V17: FILA EJECUTIVA CON SOLO 2 GRÁFICAS === */
+.executive-two-charts{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+  gap:14px!important;
+  align-items:stretch!important;
+}
+.executive-two-charts>.chartcard{
+  min-width:0!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+}
+.executive-two-charts .canvasbox{
+  width:100%!important;
+  min-width:0!important;
+}
+@media(max-width:850px){
+  .executive-two-charts{
+    grid-template-columns:1fr!important;
+  }
+}
+
 </style>
 
 <style>
@@ -873,7 +896,8 @@
 </div>
 <div class="insights-row"><div><b>ENFOCA TUS RECURSOS</b><span id="insightFocus">—</span></div><div><b>IMPACTO</b><span id="insightImpact">—</span></div><div><b>VIGILAR</b><span id="insightWatch">—</span></div></div>
 </section>
-<section class="grid3"><div class="chartcard"><div class="charthead"><div><h3>Rechazo por cliente — Top 8</h3><span>Impacto acumulado</span></div></div><div class="canvasbox"><canvas id="client"></canvas></div></div><div class="chartcard"><div class="charthead"><div><h3>Tendencia semanal — % rechazo</h3><span>Señal de corto plazo frente a la meta del 5%</span></div><div><span class="badge">META ≤ 5%</span><span id="weekTrendStatus" class="trend-status weekly neutral">SIN DATOS</span></div></div><div class="canvasbox"><canvas id="weekTrend"></canvas></div></div><div class="chartcard"><div class="charthead"><div><h3>Top 10 batches rechazados</h3><span>Magnitud por lote</span></div></div><div class="tablewrap" id="batchTable"></div></div></section>
+<section class="grid2 executive-two-charts"><div class="chartcard"><div class="charthead"><div><h3>Rechazo por cliente — Top 8</h3><span>Impacto acumulado</span></div></div><div class="canvasbox"><canvas id="client"></canvas></div></div><div class="chartcard"><div class="charthead"><div><h3>Tendencia semanal — % rechazo</h3><span>Señal de corto plazo frente a la meta del 5%</span></div><div><span class="badge">META ≤ 5%</span><span id="weekTrendStatus" class="trend-status weekly neutral">SIN DATOS</span></div></div><div class="canvasbox"><canvas id="weekTrend"></canvas></div></div></section>
+<div id="batchTable" style="display:none!important"></div>
 <div class="insight" id="insight">Lectura ejecutiva: esperando datos…</div>
 </div>
 <script>
