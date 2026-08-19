@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V36 AREA VERDE ROJA SEGUN META -->
 <!-- VERSION: V35 CURVA SIN ETIQUETAS -->
 <!-- VERSION: V34 SIN ETIQUETA CURVA -->
 <!-- VERSION: V33 CURVA SUTIL -->
@@ -1961,13 +1962,102 @@ const monthlyTargetLine={
   }
 };
 
-function chart(id,type,data,opts={}){destroy(id);charts[id]=new Chart($(id),{type,data,plugins:[executiveDataLabels,monthlyTargetLine],options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{grid:{color:'#e8eef2'},ticks:{font:{size:9}}}},...opts}})}
+function chart(id,type,data,opts={}){destroy(id);charts[id]=new Chart($(id),{type,data,plugins:[trendStatusArea,executiveDataLabels,monthlyTargetLine],options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{grid:{color:'#e8eef2'},ticks:{font:{size:9}}}},...opts}})}
 function escapeHtml(s){
   return String(s ?? '').replace(/[&<>"']/g, function(m){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m];
   });
 }
 
+
+const trendStatusArea={
+  id:'trendStatusArea',
+  beforeDatasetsDraw(chart){
+    if(chart.canvas.id!=='trend') return;
+    const dsIndex=chart.data.datasets.findIndex(ds=>ds.label==='% rechazo');
+    if(dsIndex<0) return;
+    const meta=chart.getDatasetMeta(dsIndex);
+    const values=chart.data.datasets[dsIndex].data||[];
+    if(!meta.data || meta.data.length<2) return;
+
+    const yScale=chart.scales.y;
+    const xScale=chart.scales.x;
+    const target=5;
+    const baseY=yScale.getPixelForValue(0);
+    const targetY=yScale.getPixelForValue(target);
+    const area=chart.chartArea;
+    const green='rgba(40, 174, 92, 0.13)';
+    const red='rgba(222, 68, 68, 0.13)';
+    const ctx=chart.ctx;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(area.left,area.top,area.right-area.left,area.bottom-area.top);
+    ctx.clip();
+
+    for(let i=0;i<meta.data.length-1;i++){
+      const p1=meta.data[i].getProps(['x','y'],true);
+      const p2=meta.data[i+1].getProps(['x','y'],true);
+      const v1=Number(values[i]), v2=Number(values[i+1]);
+      if(!Number.isFinite(v1)||!Number.isFinite(v2)) continue;
+
+      const above1=v1>target, above2=v2>target;
+
+      const fillSegment=(x1,y1,x2,y2,color)=>{
+        ctx.beginPath();
+        ctx.moveTo(x1,baseY);
+        ctx.lineTo(x1,y1);
+        ctx.lineTo(x2,y2);
+        ctx.lineTo(x2,baseY);
+        ctx.closePath();
+        ctx.fillStyle=color;
+        ctx.fill();
+      };
+
+      if(above1===above2){
+        fillSegment(p1.x,p1.y,p2.x,p2.y,above1?red:green);
+      }else{
+        const t=(target-v1)/(v2-v1);
+        const xc=p1.x+(p2.x-p1.x)*t;
+
+        if(above1){
+          fillSegment(p1.x,p1.y,xc,targetY,red);
+          fillSegment(xc,targetY,p2.x,p2.y,green);
+        }else{
+          fillSegment(p1.x,p1.y,xc,targetY,green);
+          fillSegment(xc,targetY,p2.x,p2.y,red);
+        }
+      }
+    }
+
+    // Fill the area from the first/last point to the chart edges.
+    const first=meta.data[0].getProps(['x','y'],true);
+    const last=meta.data[meta.data.length-1].getProps(['x','y'],true);
+    const firstV=Number(values[0]), lastV=Number(values[values.length-1]);
+    if(Number.isFinite(firstV)){
+      ctx.beginPath();
+      ctx.moveTo(area.left,baseY);
+      ctx.lineTo(first.x,baseY);
+      ctx.lineTo(first.x,first.y);
+      ctx.lineTo(area.left,first.y);
+      ctx.closePath();
+      ctx.fillStyle=firstV>target?red:green;
+      ctx.fill();
+    }
+    if(Number.isFinite(lastV)){
+      ctx.beginPath();
+      ctx.moveTo(last.x,baseY);
+      ctx.lineTo(area.right,baseY);
+      ctx.lineTo(area.right,last.y);
+      ctx.lineTo(last.x,last.y);
+      ctx.closePath();
+      ctx.fillStyle=lastV>target?red:green;
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
+};
 
 const executiveDataLabels={
   id:'executiveDataLabels',
@@ -2116,8 +2206,8 @@ function renderCharts(lf,rf){
     label:'% rechazo',
     data:trendValues,
     borderColor:'#357ca5',
-    backgroundColor:'rgba(53,124,165,.12)',
-    fill:true,
+    backgroundColor:'transparent',
+    fill:false,
     borderWidth:3,
     pointRadius:5,
     pointHoverRadius:7,
@@ -2149,7 +2239,19 @@ function renderCharts(lf,rf){
       display:true,
       position:'top',
       align:'start',
-      labels:{boxWidth:14,boxHeight:1,padding:12,font:{size:8,weight:'600'}}
+      labels:{
+        boxWidth:14,
+        boxHeight:1,
+        padding:12,
+        font:{size:8,weight:'600'},
+        generateLabels:chart=>{
+          const base=Chart.defaults.plugins.legend.labels.generateLabels(chart);
+          return base.concat([
+            {text:'≤ 5% Cumple',fillStyle:'rgba(40,174,92,.35)',strokeStyle:'rgba(40,174,92,.55)',lineWidth:1},
+            {text:'> 5% Fuera de meta',fillStyle:'rgba(222,68,68,.35)',strokeStyle:'rgba(222,68,68,.55)',lineWidth:1}
+          ]);
+        }
+      }
     },
     tooltip:{
       filter:ctx=>!['Tendencia','Curva de tendencia'].includes(ctx.dataset.label),
