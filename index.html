@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V13 DONUT VALUE CENTERED -->
 <!-- VERSION: V12 PARETO SIN ESPACIO DESAPROVECHADO -->
 <!-- VERSION: V11 PARETO COMPOSICION VISUAL EJECUTIVA -->
 <!-- VERSION: V10 CORRECCION OVERFLOW RECHAZO POR AREA -->
@@ -625,6 +626,71 @@
     min-height:340px!important;
     flex-basis:340px!important;
   }
+}
+
+/* === V13: VALOR DEL DONUT CENTRADO Y SIN SOLAPAMIENTO === */
+.pareto-summary,
+.pareto-summary .pareto-concentration,
+.pareto-summary .donut-wrap,
+.pareto-summary .donut-box{
+  overflow:visible!important;
+  box-sizing:border-box!important;
+}
+.pareto-summary .donut-wrap,
+.pareto-summary .donut-box{
+  position:relative!important;
+  width:82px!important;
+  height:82px!important;
+  min-width:82px!important;
+  min-height:82px!important;
+  flex:0 0 82px!important;
+}
+.pareto-summary canvas#paretoDonut{
+  width:82px!important;
+  height:82px!important;
+  display:block!important;
+}
+.pareto-summary .donut-value,
+.pareto-summary #paretoDonutValue{
+  position:absolute!important;
+  left:50%!important;
+  top:50%!important;
+  transform:translate(-50%,-50%)!important;
+  width:58px!important;
+  max-width:58px!important;
+  text-align:center!important;
+  line-height:1!important;
+  font-size:18px!important;
+  font-weight:900!important;
+  letter-spacing:-.5px!important;
+  white-space:nowrap!important;
+  z-index:3!important;
+  pointer-events:none!important;
+}
+.pareto-summary .donut-sub,
+.pareto-summary #paretoDonutSub{
+  position:absolute!important;
+  left:50%!important;
+  top:calc(50% + 14px)!important;
+  transform:translateX(-50%)!important;
+  width:52px!important;
+  text-align:center!important;
+  font-size:7px!important;
+  line-height:1.1!important;
+  white-space:nowrap!important;
+  z-index:3!important;
+  pointer-events:none!important;
+}
+
+/* Evita que reglas antiguas del donut vuelvan a desplazar el texto. */
+.pareto-summary .donut-label,
+.pareto-summary .donut-center{
+  position:absolute!important;
+  inset:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  pointer-events:none!important;
 }
 </style>
 
