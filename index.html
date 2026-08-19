@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: PARETO ZONA DE ATAQUE + FIX MS + FIX ESCAPEHTML -->
 <!-- VERSION: PARETO ZONA DE ATAQUE + FIX MS -->
 <!-- VERSION: PARETO EJECUTIVO ZONA DE ATAQUE -->
 <!-- VERSION: TENDENCIA MENSUAL/SEMANAL ADAPTABLE -->
@@ -335,6 +336,12 @@ function renderKpis(lf,rf){const vol=lf.reduce((s,r)=>s+num(r.LIBERADO_KG_DASHBO
 function aggregate(rows,key){const m=new Map();rows.forEach(r=>{const k=String(r[key]??'').trim();if(k)m.set(k,(m.get(k)||0)+num(r.KILOS_RECHAZO_DASHBOARD))});return [...m.entries()].sort((a,b)=>b[1]-a[1])}
 function destroy(id){if(charts[id])charts[id].destroy()}
 function chart(id,type,data,opts={}){destroy(id);charts[id]=new Chart($(id),{type,data,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{grid:{color:'#e8eef2'},ticks:{font:{size:9}}}},...opts}})}
+function escapeHtml(s){
+  return String(s ?? '').replace(/[&<>"']/g, function(m){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m];
+  });
+}
+
 function renderCharts(lf,rf){
  const monthlyMode=state.months.size===0;
  let trendLabels=[],trendValues=[];
