@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: FIX ERROR NULL + TREND LAYOUT + NATIVE DATA LABELS -->
 <!-- VERSION: TENDENCIA CON ETIQUETAS DE DATOS -->
 <!-- VERSION: VISTA EJECUTIVA DONDE DEBEMOS ATACAR -->
 <!-- VERSION: PARETO ZONA DE ATAQUE + FIX MS + FIX ESCAPEHTML -->
@@ -203,6 +204,14 @@
 .trend-insight{margin-top:10px;padding:10px 14px;border-left:4px solid #2b78c5;border-radius:8px;background:#f5f9fc;color:#345b76;font-size:11px}
 @media(max-width:800px){.trend-summary-strip{grid-template-columns:1fr 1fr}.trend-stat:nth-child(2){border-right:0}.trend-stat:nth-child(n+3){border-top:1px solid #e1eaf0}}
 
+
+/* === FIXES VISTA EJECUTIVA === */
+.grid2>.chartcard:first-child .canvasbox{height:300px!important}
+.grid2>.chartcard:first-child .trend-summary-strip{position:relative;z-index:2}
+.trend-summary-strip{margin-top:12px!important}
+.trend-insight{margin-bottom:4px!important}
+.executive-causes{margin-top:18px!important}
+@media(max-width:800px){.grid2>.chartcard:first-child .canvasbox{height:270px!important}}
 </style>
 
 <style>
@@ -253,7 +262,7 @@
 <div class="kpi"><div class="label">Batches procesados</div><div class="value" id="kBat">—</div><div class="semrow"><div class="lamp green"></div><div class="semtext"><b>ACTIVIDAD</b><span>Informativo</span></div></div><div class="sub">Batches únicos en la selección</div></div>
 </section>
 <div class="summary">Los KPI y gráficos se recalculan con la selección. Fecha, mes, semana, cliente y tela aplican a ambos libros; área y causa refinan el análisis de rechazos.</div>
-<section class="grid2"><div class="chartcard"><div class="charthead"><div><h3>Tendencia mensual — % rechazo</h3><span>Gerencia: evolución del desempeño frente a la meta del 5%</span></div><div><span class="badge">META ≤ 5%</span><span id="trendStatus" class="trend-status neutral">SIN DATOS</span></div></div><div class="canvasbox"><canvas id="trend"></canvas>
+<section class="grid2"><div class="chartcard"><div class="charthead"><div><h3>Tendencia mensual — % rechazo</h3><span>Gerencia: evolución del desempeño frente a la meta del 5%</span></div><div><span class="badge">META ≤ 5%</span><span id="trendStatus" class="trend-status neutral">SIN DATOS</span></div></div><div class="canvasbox"><canvas id="trend"></canvas></div>
 <div class="trend-summary-strip">
   <div class="trend-stat"><small>PROMEDIO DEL PERÍODO</small><strong id="trendAvg">—</strong><span id="trendAvgPeriod">—</span></div>
   <div class="trend-stat"><small>MEJOR DESEMPEÑO</small><strong id="trendBest">—</strong><span id="trendBestPeriod">—</span></div>
@@ -418,12 +427,46 @@ function renderKpis(lf,rf){const vol=lf.reduce((s,r)=>s+num(r.LIBERADO_KG_DASHBO
 }
 function aggregate(rows,key){const m=new Map();rows.forEach(r=>{const k=String(r[key]??'').trim();if(k)m.set(k,(m.get(k)||0)+num(r.KILOS_RECHAZO_DASHBOARD))});return [...m.entries()].sort((a,b)=>b[1]-a[1])}
 function destroy(id){if(charts[id])charts[id].destroy()}
-function chart(id,type,data,opts={}){destroy(id);charts[id]=new Chart($(id),{type,data,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{grid:{color:'#e8eef2'},ticks:{font:{size:9}}}},...opts}})}
+function chart(id,type,data,opts={}){destroy(id);charts[id]=new Chart($(id),{type,data,plugins:[executiveDataLabels],options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{grid:{color:'#e8eef2'},ticks:{font:{size:9}}}},...opts}})}
 function escapeHtml(s){
   return String(s ?? '').replace(/[&<>"']/g, function(m){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m];
   });
 }
+
+
+const executiveDataLabels={
+  id:'executiveDataLabels',
+  afterDatasetsDraw(chart){
+    const {ctx}=chart;
+    chart.data.datasets.forEach((ds,di)=>{
+      if(ds.type==='line' && chart.canvas.id==='pareto') return;
+      const meta=chart.getDatasetMeta(di);
+      if(!meta || meta.hidden) return;
+      meta.data.forEach((el,i)=>{
+        const raw=ds.data?.[i];
+        if(!Number.isFinite(Number(raw)) || chart.canvas.id!=='trend') return;
+        const v=Number(raw);
+        const p=el.getProps(['x','y'],true);
+        const text=v.toFixed(1)+'%';
+        const color=v<=5?'#16944f':(v<=7?'#c78900':'#d43f3f');
+        ctx.save();
+        ctx.font='800 10px Arial';
+        const padX=5,padY=3;
+        const w=ctx.measureText(text).width+padX*2,h=17;
+        const above=(i%2===0);
+        const x=p.x-w/2,y=above?p.y-h-9:p.y+9;
+        ctx.beginPath();
+        ctx.roundRect(x,y,w,h,4);
+        ctx.fillStyle='#ffffff';ctx.fill();
+        ctx.strokeStyle=color;ctx.lineWidth=1;ctx.stroke();
+        ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(text,p.x,y+h/2);
+        ctx.restore();
+      });
+    });
+  }
+};
 
 function renderCharts(lf,rf){
  const monthlyMode=state.months.size===0;
@@ -490,16 +533,7 @@ function renderCharts(lf,rf){
 },{maintainAspectRatio:false,
   plugins:{
     legend:{display:false},
-    tooltip:{callbacks:{label:ctx=>Number(ctx.raw).toFixed(2)+'%'}},
-    datalabels:{display:true,align:(ctx)=>ctx.dataIndex%2?'top':'bottom',anchor:'end',offset:6,
-      formatter:(v)=>Number(v).toFixed(1)+'%',
-      color:(ctx)=>{const v=ctx.raw;return v<=5?'#16944f':(v<=7?'#c78900':'#d43f3f');},
-      font:{weight:'800',size:11},
-      backgroundColor:'#fff',
-      borderColor:(ctx)=>{const v=ctx.raw;return v<=5?'#18a05a':(v<=7?'#e6a10b':'#df4a45');},
-      borderWidth:1,borderRadius:5,padding:4
-    }
-  },
+    tooltip:{callbacks:{label:ctx=>Number(ctx.raw).toFixed(2)+'%'}}},
   scales:{
     x:{grid:{display:false},ticks:{font:{size:9}}},
     y:{beginAtZero:true,grid:{color:'#e8eef2'},ticks:{callback:v=>v+'%',font:{size:9}}}
@@ -532,26 +566,23 @@ function renderCharts(lf,rf){
  const cs=aggregate(rf,'CAUSA').slice(0,10),total=cs.reduce((s,x)=>s+x[1],0);
 let run=0;const rows=cs.map(([cause,kg],i)=>{run+=kg;return{cause,kg,pct:total?run/total*100:0,index:i}});
 const cross=rows.findIndex(r=>r.pct>=80),attackCount=cross>=0?cross+1:rows.length,attackAccum=cross>=0?rows[cross].pct:(rows.length?rows[rows.length-1].pct:0);
-$('paretoDonutValue').textContent=attackAccum.toFixed(1)+'%';
-$('paretoPriorityCount').textContent=attackCount+' causas';
-$('paretoPriorityText').textContent='explican la mayor parte del impacto del rechazo';
-$('paretoAttackCount').textContent=attackCount;
-$('paretoExecutiveHeadline').textContent=`Atacar primero las causas 1–${attackCount}`;
-$('paretoExecutiveText').textContent=`Representan ${attackAccum.toFixed(1)}% del rechazo total. Aquí está el mayor potencial de mejora.`;
-$('paretoActionText').textContent=`Las primeras ${attackCount} causas concentran ${attackAccum.toFixed(1)}% del rechazo.`;
-$('insightFocus').textContent=`Enfocar recursos en las primeras ${attackCount} causas.`;
-$('insightImpact').textContent=`Una reducción en estas causas impactará directamente el rechazo total.`;
-$('insightWatch').textContent=rows.length?`Vigilar la tendencia de “${rows[0].cause}” y las demás causas prioritarias.`:'Sin datos suficientes.';
+if($('paretoDonutValue'))$('paretoDonutValue').textContent=attackAccum.toFixed(1)+'%';
+if($('paretoPriorityCount'))$('paretoPriorityCount').textContent=attackCount+' causas';
+if($('paretoPriorityText'))$('paretoPriorityText').textContent='explican la mayor parte del impacto del rechazo';
+if($('paretoAttackCount'))$('paretoAttackCount').textContent=attackCount;
+if($('paretoExecutiveHeadline'))$('paretoExecutiveHeadline').textContent=`Atacar primero las causas 1–${attackCount}`;
+if($('paretoExecutiveText'))$('paretoExecutiveText').textContent=`Representan ${attackAccum.toFixed(1)}% del rechazo total. Aquí está el mayor potencial de mejora.`;
+if($('paretoActionText'))$('paretoActionText').textContent=`Las primeras ${attackCount} causas concentran ${attackAccum.toFixed(1)}% del rechazo.`;
+if($('insightFocus'))$('insightFocus').textContent=`Enfocar recursos en las primeras ${attackCount} causas.`;
+if($('insightImpact'))$('insightImpact').textContent=`Una reducción en estas causas impactará directamente el rechazo total.`;
+if($('insightWatch'))$('insightWatch').textContent=rows.length?`Vigilar la tendencia de “${rows[0].cause}” y las demás causas prioritarias.`:'Sin datos suficientes.';
 const donutCtx=$('paretoDonut').getContext('2d');if(window.paretoDonutChart)window.paretoDonutChart.destroy();
 window.paretoDonutChart=new Chart(donutCtx,{type:'doughnut',data:{labels:['Prioridad','Resto'],datasets:[{data:[attackAccum,Math.max(0,100-attackAccum)],backgroundColor:['#df4a45','#dfe5e9'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{enabled:false}}}});
 $('paretoRankingList').innerHTML=rows.map((r,i)=>`<div class="pareto-rank-row ${i<attackCount?'priority':''} ${i===attackCount-1?'attack-end':''}"><span class="pareto-rank-num">${i+1}</span><span><span class="pareto-rank-name">${escapeHtml(r.cause)}</span><span class="pareto-rank-kg">${r.kg.toLocaleString('en-US',{maximumFractionDigits:1})} kg</span></span><span class="pareto-rank-pct">${(r.kg/total*100).toFixed(2)}%</span></div>`).join('');
 chart('pareto','bar',{labels:rows.map(r=>r.cause),datasets:[{type:'bar',data:rows.map(r=>+r.kg.toFixed(1)),backgroundColor:rows.map((r,i)=>i<attackCount?'#17638f':'#b9c0c5'),borderRadius:4},{type:'line',data:rows.map(r=>r.pct),borderColor:'#e68a22',pointBackgroundColor:rows.map((r,i)=>i===attackCount-1?'#df4a45':'#e68a22'),pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:rows.map((r,i)=>i===attackCount-1?7:3),yAxisID:'y1',tension:.25}]},{plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.type==='line'?ctx.raw.toFixed(1)+'% acumulado':ctx.raw.toLocaleString('en-US',{maximumFractionDigits:1})+' kg'}}},scales:{x:{ticks:{maxRotation:38,minRotation:38,font:{size:8}},grid:{display:false}},y:{beginAtZero:true,grid:{color:'#edf2f5'},ticks:{callback:v=>Number(v).toLocaleString('en-US')+' kg',font:{size:9}}},y1:{position:'right',beginAtZero:true,max:100,grid:{display:false},ticks:{callback:v=>v+'%',font:{size:8}}}}});
  const cl=aggregate(rf,'CLIENTE').slice(0,8);chart('client','bar',{labels:cl.map(x=>x[0]),datasets:[{data:cl.map(x=>+x[1].toFixed(1)),backgroundColor:'#438f8e',borderRadius:5}]},{indexAxis:'y',scales:{x:{grid:{color:'#edf2f5'}},y:{grid:{display:false},ticks:{font:{size:8}}}}});
  const weekMap={};rf.forEach(r=>{const w=String(r.SEMANA??'').trim();if(!w)return;if(!weekMap[w])weekMap[w]={k:0,v:0};weekMap[w].k+=num(r.KILOS_RECHAZO_DASHBOARD)});lf.forEach(r=>{const w=String(r.SEMANA??'').trim();if(!w)return;if(!weekMap[w])weekMap[w]={k:0,v:0};weekMap[w].v+=num(r.LIBERADO_KG_DASHBOARD)});const ws=Object.keys(weekMap).sort(sortWeeks);const weekValues=ws.map(w=>weekMap[w].v?+(weekMap[w].k/weekMap[w].v*100).toFixed(2):null);const latestWeek=weekValues.length?weekValues[weekValues.length-1]:NaN;const [wsc,wst]=trendStatus(latestWeek);const wse=$('weekTrendStatus');wse.className='trend-status weekly '+wsc;wse.textContent=wst;const weekLabels=ws.map(x=>{const m=String(x).match(/(\d+)(?:\D*)$/);return m?'Sem '+String(parseInt(m[1],10)).padStart(2,'0'):x});const weekPointColors=weekValues.map(v=>Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#9aaab6');chart('weekTrend','line',{labels:weekLabels,datasets:[{label:'% rechazo',data:weekValues,borderColor:'#6f8798',backgroundColor:'rgba(63,142,141,.08)',pointRadius:4,pointHoverRadius:7,pointBackgroundColor:weekPointColors,pointBorderColor:'#fff',pointBorderWidth:2,borderWidth:3,tension:.22,fill:true,segment:{borderColor:ctx=>{const v=ctx.p1?.parsed?.y;return Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#6f8798';}}},{label:'Meta 5%',data:ws.map(()=>5),borderColor:'#7d8d9b',borderDash:[6,5],borderWidth:2,pointRadius:0,fill:false,tension:0}]},{scales:{y:{beginAtZero:true,suggestedMax:Math.max(10,Math.ceil((Math.max(...weekValues.filter(Number.isFinite),5)||10)/5)*5),ticks:{callback:v=>v+'%'},grid:{color:'#e8eef2'}},x:{grid:{display:false},ticks:{maxRotation:45,minRotation:0,autoSkip:true,font:{size:9}}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.label==='Meta 5%'?'Meta: 5%':(Number.isFinite(ctx.raw)?ctx.raw.toFixed(2)+'% rechazo':'Sin datos')}}}});
- $('causeTable').innerHTML=cs.map((x,i)=>`<div class="rank"><b>${i+1}</b><span title="${esc(x[0])}">${esc(x[0])}</span><span class="kg">${fmt(x[1],1)} kg</span><span>${total?pct(x[1]/total):'0.00%'}</span></div>`).join('')||'<div class="sub">Sin datos</div>';
- const bt=aggregate(rf,'BATCH').slice(0,10);
- const batchHeader='<div class="batch-head"><span>#</span><span></span><span>BATCH</span><span>KG RECHAZADOS</span><span>REPROCESOS</span><span>ESTADO</span><span></span></div>';
- const batchRows=bt.map((x,i)=>{
+const batchRows=bt.map((x,i)=>{
    const batch=String(x[0]);
    const events=rf.filter(r=>String(r.BATCH??'').trim()===batch);
    const count=events.length;
