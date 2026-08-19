@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V12 PARETO SIN ESPACIO DESAPROVECHADO -->
 <!-- VERSION: V11 PARETO COMPOSICION VISUAL EJECUTIVA -->
 <!-- VERSION: V10 CORRECCION OVERFLOW RECHAZO POR AREA -->
 <!-- VERSION: V9 OPCION 1 RANKING EJECUTIVO AREA -->
@@ -571,6 +572,60 @@
   }
 }
 
+
+/* === V12: ELIMINAR ESPACIO DESAPROVECHADO EN PARETO === */
+.executive-causes .pareto-chart-wrap{
+  display:flex!important;
+  flex-direction:column!important;
+  height:100%!important;
+  min-height:0!important;
+  box-sizing:border-box!important;
+}
+.executive-causes .pareto-legend{
+  flex:0 0 auto!important;
+}
+.executive-causes .executive-canvas{
+  flex:1 1 auto!important;
+  height:460px!important;
+  min-height:460px!important;
+  flex-basis:460px!important;
+  width:100%!important;
+  position:relative!important;
+  box-sizing:border-box!important;
+}
+.executive-causes .executive-canvas canvas#pareto{
+  width:100%!important;
+  height:100%!important;
+  display:block!important;
+}
+.executive-causes .attack-zone-note{
+  flex:0 0 auto!important;
+  margin-top:7px!important;
+}
+
+/* Si la pantalla permite la columna completa, el gráfico utiliza
+   prácticamente toda la altura disponible del ranking lateral. */
+@media(min-width:1200px){
+  .executive-causes .executive-canvas{
+    height:480px!important;
+    min-height:480px!important;
+    flex-basis:480px!important;
+  }
+}
+@media(max-width:1050px) and (min-width:851px){
+  .executive-causes .executive-canvas{
+    height:420px!important;
+    min-height:420px!important;
+    flex-basis:420px!important;
+  }
+}
+@media(max-width:850px){
+  .executive-causes .executive-canvas{
+    height:340px!important;
+    min-height:340px!important;
+    flex-basis:340px!important;
+  }
+}
 </style>
 
 <style>
