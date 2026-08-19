@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V10 CORRECCION OVERFLOW RECHAZO POR AREA -->
 <!-- VERSION: V9 OPCION 1 RANKING EJECUTIVO AREA -->
 <!-- VERSION: V8 SIN BATCHHEADER + ERROR REAL -->
 <!-- VERSION: V6 PARETO EJECUTIVO COMPACTO -->
@@ -375,6 +376,99 @@
 .area-attack-pct small{display:block;font-size:8px;font-weight:700;color:#708395}
 @media(max-width:900px){.area-rank-card{grid-template-columns:32px 1fr auto}.area-rank-bar-wrap{grid-column:2/4}.area-rank-kg{grid-column:3;grid-row:1}.area-rank-pct{grid-column:3;grid-row:2}}
 @media(max-width:600px){.area-rank-card{grid-template-columns:32px 1fr}.area-rank-kg,.area-rank-pct{grid-column:2;text-align:left}.area-rank-bar-wrap{grid-column:2}.area-attack-card{grid-template-columns:38px 1fr}.area-attack-pct{grid-column:2;text-align:left}}
+
+/* === V10: CORRECCIÓN DE CONTENIDO FUERA DE BORDES === */
+.area-executive{
+  min-width:0!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+.area-ranking{
+  width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+.area-rank-card{
+  width:100%!important;
+  min-width:0!important;
+  grid-template-columns:32px 115px minmax(60px,1fr) 105px 52px!important;
+  gap:8px!important;
+  overflow:hidden!important;
+}
+.area-rank-name{
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.area-rank-bar-wrap{
+  min-width:0!important;
+  width:100%!important;
+}
+.area-rank-track{
+  min-width:20px!important;
+  width:100%!important;
+}
+.area-rank-kg,
+.area-rank-pct{
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+.area-rank-pct{
+  padding-right:2px!important;
+}
+.area-attack-card{
+  width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+.area-attack-title,
+.area-attack-sub{
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+.area-attack-pct{
+  min-width:48px!important;
+  padding-right:2px!important;
+  white-space:nowrap!important;
+}
+
+/* En anchos intermedios reducimos todavía más las columnas para que
+   ningún dato salga de la tarjeta. */
+@media (max-width:1250px) and (min-width:901px){
+  .area-rank-card{
+    grid-template-columns:30px 100px minmax(45px,1fr) 92px 48px!important;
+    gap:6px!important;
+    padding:8px 9px!important;
+  }
+  .area-rank-name{font-size:10px!important}
+  .area-rank-kg,.area-rank-pct{font-size:10px!important}
+}
+
+/* En móvil se reorganiza el ranking en dos filas. */
+@media(max-width:900px){
+  .area-rank-card{
+    grid-template-columns:32px minmax(0,1fr) auto!important;
+    overflow:visible!important;
+  }
+  .area-rank-name{grid-column:2!important}
+  .area-rank-kg{grid-column:3!important;grid-row:1!important}
+  .area-rank-pct{grid-column:3!important;grid-row:2!important}
+  .area-rank-bar-wrap{grid-column:2/4!important;grid-row:2!important}
+}
+
+/* Evita que el layout 60/40 fuerce overflow horizontal. */
+.grid2,
+.grid2>*{
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+
 </style>
 
 <style>
