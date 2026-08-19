@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
-<!-- VERSION: FILTRO MES CHIP RESUMEN V3 -->
+<!-- VERSION: MES -> SEMANA DEPENDIENTE V1 -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
@@ -95,6 +95,23 @@
 .month-chip-more{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:28px!important;height:24px!important;padding:0 7px!important;border-radius:999px!important;background:#164b70!important;color:#fff!important;font-size:11px!important;font-weight:900!important;flex:0 0 auto!important}
 
 </style>
+
+<style>
+/* Indica que SEMANA está condicionada por MES */
+.field[data-key="weeks"].constrained .selectbtn{
+  border-color:#6fa8cf;
+  background:#f4f9fc;
+}
+.field[data-key="weeks"] .dependency-note{
+  display:none;
+  margin-top:5px;
+  font-size:10px;
+  color:#5d7890;
+}
+.field[data-key="weeks"].constrained .dependency-note{
+  display:block;
+}
+</style>
 </head>
 <body>
 <div class="loading" id="loading">Cargando datos del archivo maestro…</div>
@@ -112,7 +129,7 @@
 <div class="panel filters"><div class="filtergrid">
 <div class="field"><label>DESDE</label><input id="from" type="date"></div><div class="field"><label>HASTA</label><input id="to" type="date"></div>
 <div class="field multi" data-key="months"><label>MES</label><button class="selectbtn month-selectbtn" type="button" aria-label="Seleccionar meses"><span class="select-summary" data-month-summary>Todos los meses</span><span class="select-arrow">⌄</span></button><div class="menu"><div class="menuhead"><div class="selcount">Sin selección</div><div class="menu-actions"><button class="all" type="button">Todas</button><button class="clear" type="button">Limpiar</button></div></div><div class="options"></div></div></div>
-<div class="field multi" data-key="weeks"><label>SEMANA</label><button class="selectbtn" type="button">Todas las semanas <span>⌄</span></button><div class="menu"><div class="menuhead"><div class="selcount">Sin selección</div><div class="menu-actions"><button class="all" type="button">Todas</button><button class="clear" type="button">Limpiar</button></div></div><div class="options"></div></div></div>
+<div class="field multi" data-key="weeks"><label>SEMANA</label><button class="selectbtn" type="button">Todas las semanas <span>⌄</span></button><div class="menu"><div class="menuhead"><div class="selcount">Sin selección</div><div class="menu-actions"><button class="all" type="button">Todas</button><button class="clear" type="button">Limpiar</button></div></div><div class="options"></div></div><div class="dependency-note">Semanas disponibles según el mes seleccionado</div></div>
 <div class="field multi" data-key="clients"><label>CLIENTE</label><button class="selectbtn" type="button">Todos <span>⌄</span></button><div class="menu"><div class="menuhead"><div class="selcount">Sin selección</div><div class="menu-actions"><button class="all" type="button">Todas</button><button class="clear" type="button">Limpiar</button></div></div><div class="options"></div></div></div>
 <div class="field multi" data-key="areas"><label>ÁREA RESPONSABLE</label><button class="selectbtn" type="button">Todas <span>⌄</span></button><div class="menu"><div class="menuhead"><div class="selcount">Sin selección</div><div class="menu-actions"><button class="all" type="button">Todas</button><button class="clear" type="button">Limpiar</button></div></div><div class="options"></div></div></div>
 <div class="field multi" data-key="causes"><label>CAUSA</label><button class="selectbtn" type="button">Todas <span>⌄</span></button><div class="menu"><div class="menuhead"><div class="selcount">Sin selección</div><div class="menu-actions"><button class="all" type="button">Todas</button><button class="clear" type="button">Limpiar</button></div></div><div class="options"></div></div></div>
@@ -206,6 +223,47 @@ function renderMonthSummary(el){
  }
 }
 
+
+function refreshWeeksForMonths(){
+ const weekEl=document.querySelector('[data-key="weeks"]');
+ if(!weekEl) return;
+
+ const selectedMonths=[...state.months];
+ const allRows=[
+   ...LIB.map(r=>({row:r,dateField:'FECHA'})),
+   ...REJ.map(r=>({row:r,dateField:'FECHA RECHAZO'}))
+ ];
+
+ let weeks;
+ if(selectedMonths.length===0){
+   weekEl.classList.remove('constrained');
+   weeks=unique(allRows.map(x=>x.row.SEMANA));
+ }else{
+   weekEl.classList.add('constrained');
+   weeks=unique(allRows
+     .filter(x=>selectedMonths.includes(monthKeyFromRow(x.row,x.dateField)))
+     .map(x=>x.row.SEMANA));
+ }
+
+ weeks.sort(sortWeeks);
+ const opt=weekEl.querySelector('.options');
+ opt.innerHTML=weeks.map(v=>`<label class="opt"><input type="checkbox" value="${esc(v)}" checked><span>${esc(v)}</span></label>`).join('');
+
+ state.weeks=new Set(weeks.map(String));
+ const total=weeks.length;
+ weekEl.querySelector('.selcount').textContent=total?'Todas':'Sin selección';
+
+ const btn=weekEl.querySelector('.selectbtn');
+ const first=btn.childNodes[0];
+ if(first && first.nodeType===3) first.textContent='Todas las semanas';
+
+ opt.querySelectorAll('input').forEach(i=>i.onchange=()=>{
+   sync(weekEl,'weeks','Todas las semanas');
+ });
+
+ // Keep the menu open/closed state unchanged; only refresh its options.
+}
+
 function sync(el,key,labelAll){
  state[key]=new Set([...el.querySelectorAll('input:checked')].map(i=>i.value));
  const n=state[key].size,total=el.querySelectorAll('input').length;
@@ -213,6 +271,7 @@ function sync(el,key,labelAll){
 
  if(key==='months'){
    renderMonthSummary(el);
+   refreshWeeksForMonths();
  }else{
    const btn=el.querySelector('.selectbtn');
    const first=btn.childNodes[0];
