@@ -5,6 +5,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V9 OPCION 1 RANKING EJECUTIVO AREA -->
+<!-- VERSION: V8 SIN BATCHHEADER + ERROR REAL -->
 <!-- VERSION: V6 PARETO EJECUTIVO COMPACTO -->
 <!-- VERSION: V5 PARETO Y TABLA ALINEADOS -->
 <!-- VERSION: V4 FIX bt NOT DEFINED -->
@@ -346,6 +348,33 @@
  .executive-causes .executive-canvas,
  .executive-causes #pareto{height:315px!important;min-height:315px!important}
 }
+
+/* === V9: OPCIÓN 1 — RANKING EJECUTIVO PARA RECHAZO POR ÁREA === */
+.area-executive{padding:18px!important}
+.area-ranking{display:flex;flex-direction:column;gap:8px}
+.area-rank-card{display:grid;grid-template-columns:36px 150px minmax(180px,1fr) 125px 78px;align-items:center;gap:12px;min-height:62px;padding:9px 12px;border:1px solid #e2e9ed;border-radius:11px;background:#fff;box-sizing:border-box}
+.area-rank-card.priority-1{border-color:#f1c4c4;background:linear-gradient(90deg,#fff8f8,#fff)}
+.area-rank-card.priority-2{border-color:#f0d8b8;background:linear-gradient(90deg,#fffaf4,#fff)}
+.area-rank-card.priority-4{background:#fafbfc}
+.area-rank-number{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#fff;background:#aeb9c1}
+.priority-1 .area-rank-number{background:#df4747}.priority-2 .area-rank-number{background:#e8952f}.priority-3 .area-rank-number{background:#d7a21e}
+.area-rank-name{font-size:11px;font-weight:900;color:#173f61;white-space:nowrap}
+.area-rank-bar-wrap{display:flex;align-items:center;min-width:0}
+.area-rank-track{height:10px;flex:1;border-radius:999px;background:#e9eef2;overflow:hidden}
+.area-rank-fill{height:100%;border-radius:999px;background:#438f91}
+.priority-1 .area-rank-fill{background:#df4747}.priority-2 .area-rank-fill{background:#e8952f}.priority-3 .area-rank-fill{background:#d7a21e}
+.area-rank-kg{text-align:right;font-size:11px;font-weight:900;color:#173f61;white-space:nowrap}
+.area-rank-pct{text-align:right;font-size:11px;font-weight:900;color:#5d7284;white-space:nowrap}
+.priority-1 .area-rank-pct{color:#d83f3f}.priority-2 .area-rank-pct{color:#d57d17}
+.area-attack-card{margin-top:10px;display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:12px;padding:12px 15px;border:1px solid #f0caca;border-left:4px solid #df4747;border-radius:11px;background:linear-gradient(90deg,#fff7f7,#fff)}
+.area-attack-icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ffe3e3;color:#d83f3f;font-size:19px}
+.area-attack-label{font-size:9px;font-weight:900;letter-spacing:.04em;color:#d83f3f;text-transform:uppercase}
+.area-attack-title{margin-top:2px;font-size:17px;font-weight:900;color:#173f61}
+.area-attack-sub{margin-top:2px;font-size:9px;color:#61778a}
+.area-attack-pct{font-size:22px;font-weight:900;color:#d83f3f;text-align:right}
+.area-attack-pct small{display:block;font-size:8px;font-weight:700;color:#708395}
+@media(max-width:900px){.area-rank-card{grid-template-columns:32px 1fr auto}.area-rank-bar-wrap{grid-column:2/4}.area-rank-kg{grid-column:3;grid-row:1}.area-rank-pct{grid-column:3;grid-row:2}}
+@media(max-width:600px){.area-rank-card{grid-template-columns:32px 1fr}.area-rank-kg,.area-rank-pct{grid-column:2;text-align:left}.area-rank-bar-wrap{grid-column:2}.area-attack-card{grid-template-columns:38px 1fr}.area-attack-pct{grid-column:2;text-align:left}}
 </style>
 
 <style>
@@ -404,7 +433,7 @@
   <div class="trend-stat"><small>ÚLTIMO PERÍODO</small><strong id="trendLast">—</strong><span id="trendLastPeriod">—</span></div>
 </div>
 <div class="trend-insight" id="trendInsight">—</div>
-</div><div class="chartcard"><div class="charthead"><div><h3>Rechazo por área</h3><span>Concentración del impacto en kg</span></div><span class="badge">KG</span></div><div class="canvasbox"><canvas id="area"></canvas></div></div></section>
+</div><div class="chartcard area-executive"><div class="charthead"><div><h3>Rechazo por área</h3><span>¿Dónde está concentrado el impacto?</span></div><span class="badge">KG</span></div><div id="areaExecutive" class="area-ranking"></div></div></section>
 <section class="chartcard executive-causes">
 <div class="charthead"><div><h3>¿Dónde debemos atacar?</h3><span>Concentración y prioridad de las causas de rechazo</span></div><span class="badge">80/20</span></div>
 <div class="executive-summary">
@@ -696,7 +725,33 @@ function renderCharts(lf,rf){
   }
 })();
 
- const ar=aggregate(rf,'AREA RESPONSABLE').slice(0,8);chart('area','bar',{labels:ar.map(x=>x[0]),datasets:[{data:ar.map(x=>+x[1].toFixed(1)),backgroundColor:'#3f8e8d',borderRadius:5}]},{indexAxis:'y',scales:{x:{grid:{color:'#edf2f5'}},y:{grid:{display:false}}}});
+ const ar=aggregate(rf,'AREA RESPONSABLE').filter(x=>String(x[0]??'').trim()).sort((a,b)=>b[1]-a[1]);
+const areaTotal=ar.reduce((s,x)=>s+Number(x[1]||0),0),areaMax=ar.length?Number(ar[0][1]||0):0;
+const areaBox=$('areaExecutive');
+if(areaBox){
+  if(!ar.length){areaBox.innerHTML='<div class="sub">Sin datos para la selección actual.</div>';}
+  else{
+    areaBox.innerHTML=ar.map((x,i)=>{
+      const kg=Number(x[1]||0),pct=areaTotal?kg/areaTotal*100:0,width=areaMax?kg/areaMax*100:0;
+      const cls=i===0?'priority-1':i===1?'priority-2':i===2?'priority-3':'priority-4';
+      return `<div class="area-rank-card ${cls}">
+        <div class="area-rank-number">${i+1}</div>
+        <div class="area-rank-name">${esc(x[0])}</div>
+        <div class="area-rank-bar-wrap"><div class="area-rank-track"><div class="area-rank-fill" style="width:${Math.min(100,width)}%"></div></div></div>
+        <div class="area-rank-kg">${fmt(kg,1)} kg</div>
+        <div class="area-rank-pct">${pct.toFixed(1)}%</div>
+      </div>`;
+    }).join('');
+    const top=ar[0],topKg=Number(top[1]||0),topPct=areaTotal?topKg/areaTotal*100:0;
+    areaBox.insertAdjacentHTML('beforeend',`<div class="area-attack-card">
+      <div class="area-attack-icon">🎯</div>
+      <div><div class="area-attack-label">Principal área de ataque</div>
+      <div class="area-attack-title">${esc(top[0])}</div>
+      <div class="area-attack-sub">Mayor concentración de kg rechazados</div></div>
+      <div class="area-attack-pct">${topPct.toFixed(1)}%<small>DEL TOTAL</small></div>
+    </div>`);
+  }
+}
  const cs=aggregate(rf,'CAUSA').slice(0,10),total=cs.reduce((s,x)=>s+x[1],0);
 let run=0;const rows=cs.map(([cause,kg],i)=>{run+=kg;return{cause,kg,pct:total?run/total*100:0,index:i}});
 const cross=rows.findIndex(r=>r.pct>=80),attackCount=cross>=0?cross+1:rows.length,attackAccum=cross>=0?rows[cross].pct:(rows.length?rows[rows.length-1].pct:0);
@@ -716,7 +771,6 @@ $('paretoRankingList').innerHTML=rows.map((r,i)=>`<div class="pareto-rank-row ${
 chart('pareto','bar',{labels:rows.map(r=>r.cause),datasets:[{type:'bar',data:rows.map(r=>+r.kg.toFixed(1)),backgroundColor:rows.map((r,i)=>i<attackCount?'#2d7398':'#c4ccd1'),borderRadius:5,barPercentage:.72,categoryPercentage:.78},{type:'line',data:rows.map(r=>r.pct),borderColor:'#e68a22',pointBackgroundColor:rows.map((r,i)=>i===attackCount-1?'#df4a45':'#e68a22'),pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:rows.map((r,i)=>i===attackCount-1?6:2.5),yAxisID:'y1',tension:.25}]},{plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.type==='line'?ctx.raw.toFixed(1)+'% acumulado':ctx.raw.toLocaleString('en-US',{maximumFractionDigits:1})+' kg'}}},scales:{x:{ticks:{maxRotation:38,minRotation:38,font:{size:8}},grid:{display:false}},y:{beginAtZero:true,grid:{color:'#edf2f5'},ticks:{callback:v=>Number(v).toLocaleString('en-US')+' kg',font:{size:9}}},y1:{position:'right',beginAtZero:true,max:100,grid:{display:false},ticks:{callback:v=>v+'%',font:{size:8}}}}});
  const cl=aggregate(rf,'CLIENTE').slice(0,8);chart('client','bar',{labels:cl.map(x=>x[0]),datasets:[{data:cl.map(x=>+x[1].toFixed(1)),backgroundColor:'#438f8e',borderRadius:5}]},{indexAxis:'y',scales:{x:{grid:{color:'#edf2f5'}},y:{grid:{display:false},ticks:{font:{size:8}}}}});
  const weekMap={};rf.forEach(r=>{const w=String(r.SEMANA??'').trim();if(!w)return;if(!weekMap[w])weekMap[w]={k:0,v:0};weekMap[w].k+=num(r.KILOS_RECHAZO_DASHBOARD)});lf.forEach(r=>{const w=String(r.SEMANA??'').trim();if(!w)return;if(!weekMap[w])weekMap[w]={k:0,v:0};weekMap[w].v+=num(r.LIBERADO_KG_DASHBOARD)});const ws=Object.keys(weekMap).sort(sortWeeks);const weekValues=ws.map(w=>weekMap[w].v?+(weekMap[w].k/weekMap[w].v*100).toFixed(2):null);const latestWeek=weekValues.length?weekValues[weekValues.length-1]:NaN;const [wsc,wst]=trendStatus(latestWeek);const wse=$('weekTrendStatus');wse.className='trend-status weekly '+wsc;wse.textContent=wst;const weekLabels=ws.map(x=>{const m=String(x).match(/(\d+)(?:\D*)$/);return m?'Sem '+String(parseInt(m[1],10)).padStart(2,'0'):x});const weekPointColors=weekValues.map(v=>Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#9aaab6');chart('weekTrend','line',{labels:weekLabels,datasets:[{label:'% rechazo',data:weekValues,borderColor:'#6f8798',backgroundColor:'rgba(63,142,141,.08)',pointRadius:4,pointHoverRadius:7,pointBackgroundColor:weekPointColors,pointBorderColor:'#fff',pointBorderWidth:2,borderWidth:3,tension:.22,fill:true,segment:{borderColor:ctx=>{const v=ctx.p1?.parsed?.y;return Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#6f8798';}}},{label:'Meta 5%',data:ws.map(()=>5),borderColor:'#7d8d9b',borderDash:[6,5],borderWidth:2,pointRadius:0,fill:false,tension:0}]},{scales:{y:{beginAtZero:true,suggestedMax:Math.max(10,Math.ceil((Math.max(...weekValues.filter(Number.isFinite),5)||10)/5)*5),ticks:{callback:v=>v+'%'},grid:{color:'#e8eef2'}},x:{grid:{display:false},ticks:{maxRotation:45,minRotation:0,autoSkip:true,font:{size:9}}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.label==='Meta 5%'?'Meta: 5%':(Number.isFinite(ctx.raw)?ctx.raw.toFixed(2)+'% rechazo':'Sin datos')}}}});
-const batchHeader='<div class="batch-head"><span>#</span><span></span><span>BATCH</span><span>KG RECHAZADOS</span><span>REPROCESOS</span><span>ESTADO</span><span></span></div>';
 const bt=aggregate(rf,'BATCH').sort((a,b)=>b[1]-a[1]).slice(0,10);
 const batchRows=bt.map((x,i)=>{
    const batch=String(x[0]);
@@ -726,12 +780,14 @@ const batchRows=bt.map((x,i)=>{
    const detail=events.map((r,j)=>`<div class="batch-events row"><span>${j+1}</span><span>${esc(dateLabel(r['FECHA RECHAZO']))}</span><span title="${esc(r.CAUSA??'')}">${esc(r.CAUSA??'—')}</span><span class="event-kg">${fmt(num(r.KILOS_RECHAZO_DASHBOARD),1)} kg</span><span>${esc(r['AREA RESPONSABLE']??'—')}</span><span class="event-result">${esc(r.RESOLUCION??'RECHAZO')}</span></div>`).join('');
    return `<div class="batch-row ${count>1?'multi-event':''}" data-batch="${esc(batch)}"><span class="rankno">${i+1}</span><span class="chev">›</span><span class="batch-name">Batch ${esc(batch)}</span><span class="kg">${fmt(x[1],1)} kg</span><span class="rework-count ${countClass}">${count}</span><span class="badge">RECHAZO</span><button class="detail-btn" type="button" data-toggle-batch="${esc(batch)}">›</button></div><div class="batch-detail" id="detail-${esc(batch)}"><div class="batch-detail-title">${count>1?'Detalle de eventos de rechazo':'Detalle del evento de rechazo'}</div><div class="batch-events head"><span>EVENTO</span><span>FECHA</span><span>CAUSA</span><span>KG RECHAZADOS</span><span>ÁREA</span><span>RESULTADO</span></div>${detail}<div class="batch-total"><span>Total rechazado del batch</span><span>${fmt(x[1],1)} kg</span></div></div>`;
  }).join('');
- $('batchTable').innerHTML=bt.length?batchHeader+'<div class="batch-list">'+batchRows+'</div>':'<div class="sub">Sin datos</div>';
+ $('batchTable').innerHTML=bt.length
+  ? '<div class="batch-head"><span>#</span><span></span><span>BATCH</span><span>KG RECHAZADOS</span><span>REPROCESOS</span><span>ESTADO</span><span></span></div><div class="batch-list">'+batchRows+'</div>'
+  : '<div class="sub">Sin datos</div>';
  $('batchTable').querySelectorAll('[data-toggle-batch]').forEach(btn=>btn.onclick=()=>{const d=$('detail-'+btn.dataset.toggleBatch);const open=d.classList.toggle('open');btn.textContent=open?'⌃':'›';const row=btn.closest('.batch-row');row.querySelector('.chev').textContent=open?'⌄':'›'});
  const top=ar[0], topCause=cs[0];$('insight').innerHTML=top?`<b>Lectura ejecutiva:</b> <b>${esc(top[0])}</b> concentra <b>${pct(top[1]/Math.max(1,rf.reduce((s,r)=>s+num(r.KILOS_RECHAZO_DASHBOARD),0)))}</b> del rechazo seleccionado. La principal causa es <b>${topCause?esc(topCause[0]):'—'}</b>.`:'<b>Lectura ejecutiva:</b> no hay rechazos en la selección actual.';
 }
 function apply(){const [lf,rf]=filters();renderKpis(lf,rf);renderCharts(lf,rf);$('summary').textContent=`${fmt(lf.length)} registros liberación · ${fmt(rf.length)} registros rechazo · KPI según selección`}
 function populate(){const dates=LIB.map(r=>iso(r.FECHA)).filter(Boolean);$('from').value=Math.min(...dates.map(Number).map(n=>n))?dates.sort()[0]:'';$('to').value=dates.sort().slice(-1)[0]||'';setupFilter(document.querySelector('[data-key="months"]'),'months',LIB.map(r=>r.MES),'Todos los meses',monthLabel);setupFilter(document.querySelector('[data-key="weeks"]'),'weeks',unique([...LIB.map(r=>r.SEMANA),...REJ.map(r=>r.SEMANA)]),'Todas las semanas');setupFilter(document.querySelector('[data-key="clients"]'),'clients',unique([...LIB.map(r=>r.CLIENTE),...REJ.map(r=>r.CLIENTE)]),'Todos');setupFilter(document.querySelector('[data-key="areas"]'),'areas',REJ.map(r=>r['AREA RESPONSABLE']),'Todas');setupFilter(document.querySelector('[data-key="causes"]'),'causes',REJ.map(r=>r.CAUSA),'Todas');setupFilter(document.querySelector('[data-key="telas"]'),'telas',unique([...LIB.map(r=>r.TELA),...REJ.map(r=>r.TELA)]),'Todas');document.querySelectorAll('input[type=date]').forEach(i=>i.onchange=apply);$('reset').onclick=()=>{document.querySelectorAll('.options input').forEach(i=>i.checked=false);Object.keys(state).forEach(k=>state[k].clear());document.querySelectorAll('.multi').forEach(el=>{el.querySelector('.selcount').textContent='Sin selección'});$('from').value=dates.sort()[0];$('to').value=dates.sort().slice(-1)[0];apply()};document.addEventListener('click',e=>{if(!e.target.closest('.multi'))document.querySelectorAll('.multi.open').forEach(x=>{x.classList.remove('open');x.querySelector('.selectbtn').classList.remove('open')})});apply()}
-async function load(){try{const res=await fetch(DATA_URL+'?v='+Date.now());if(!res.ok)throw new Error('No se pudo cargar '+DATA_URL+' ('+res.status+')');const ab=await res.arrayBuffer();const wb=XLSX.read(ab,{type:'array',cellDates:true});const lr=XLSX.utils.sheet_to_json(wb.Sheets['LIBERADOS'],{defval:null});const rr=XLSX.utils.sheet_to_json(wb.Sheets['RECHAZOS'],{defval:null});LIB=lr;REJ=rr;populate();$('loading').style.display='none'}catch(e){console.error(e);$('loading').style.display='none';$('error').style.display='block';$('error').textContent='No fue posible cargar el archivo maestro. Verifica que DATA_DASHBOARD_CALIDAD_2026.xlsx esté en la raíz del repositorio y que el nombre sea exactamente igual. '+e.message}}
+async function load(){try{const res=await fetch(DATA_URL+'?v='+Date.now());if(!res.ok)throw new Error('No se pudo cargar '+DATA_URL+' ('+res.status+')');const ab=await res.arrayBuffer();const wb=XLSX.read(ab,{type:'array',cellDates:true});const lr=XLSX.utils.sheet_to_json(wb.Sheets['LIBERADOS'],{defval:null});const rr=XLSX.utils.sheet_to_json(wb.Sheets['RECHAZOS'],{defval:null});LIB=lr;REJ=rr;populate();$('loading').style.display='none'}catch(e){console.error(e);$('loading').style.display='none';$('error').style.display='block';$('error').textContent=(String(e.message||'').match(/(404|Failed to fetch|NetworkError|No se pudo cargar)/i)?'No fue posible cargar el archivo maestro. Verifica que DATA_DASHBOARD_CALIDAD_2026.xlsx esté en la raíz del repositorio y que el nombre sea exactamente igual. ':'Error interno del dashboard: ')+(e.message||e)} }
 load();
 </script></body></html>
