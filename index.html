@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V6 PARETO EJECUTIVO COMPACTO -->
 <!-- VERSION: V5 PARETO Y TABLA ALINEADOS -->
 <!-- VERSION: V4 FIX bt NOT DEFINED -->
 <!-- VERSION: V3 ESTRUCTURA CORREGIDA - TODO DENTRO DE WRAP -->
@@ -273,6 +274,78 @@
   }
 }
 
+
+/* === V6: PARETO EJECUTIVO MÁS LIMPIO Y COMPACTO === */
+.executive-causes{padding:18px!important}
+.executive-causes .charthead{margin-bottom:10px}
+.executive-causes .executive-summary{grid-template-columns:1fr 1fr!important;gap:10px;margin:8px 0 12px}
+.executive-causes .concentration-card,
+.executive-causes .executive-message{min-height:88px!important;padding:10px 14px!important}
+.executive-causes .donut-wrap{width:70px!important;height:70px!important}
+.executive-causes #paretoDonut{width:70px!important;height:70px!important}
+.executive-causes .donut-center strong{font-size:16px!important}
+.executive-causes .concentration-card strong{font-size:21px!important}
+.executive-causes .executive-message strong{font-size:18px!important}
+
+.executive-causes .pareto-layout{
+  grid-template-columns:minmax(0,1fr) 285px!important;
+  gap:12px!important;
+  align-items:stretch!important;
+}
+.executive-causes .pareto-chart-wrap{
+  background:#fbfcfd;
+  border:1px solid #e4ebef;
+  border-radius:11px;
+  padding:10px 12px 8px;
+  box-sizing:border-box;
+}
+.executive-causes .pareto-legend{
+  padding:0 2px 5px!important;
+  font-size:9px!important;
+}
+.executive-causes .executive-canvas{
+  height:315px!important;
+  min-height:315px!important;
+}
+.executive-causes #pareto{
+  height:315px!important;
+}
+.executive-causes .attack-zone-note{
+  margin-top:7px!important;
+  padding:8px 11px!important;
+  font-size:10px!important;
+}
+.executive-causes .executive-ranking{
+  background:#fbfcfd;
+  border:1px solid #e4ebef!important;
+  border-radius:11px!important;
+  padding:11px 12px!important;
+}
+.executive-causes .ranking-header{
+  padding-bottom:7px!important;
+}
+.executive-causes .ranking-header h4{font-size:13px!important}
+.executive-causes .ranking-header>strong{font-size:20px!important}
+.executive-causes .executive-ranking .pareto-rank-row{
+  grid-template-columns:25px 1fr auto!important;
+  padding:6px 0!important;
+  min-height:38px;
+  box-sizing:border-box;
+}
+.executive-causes .pareto-rank-name{font-size:9px!important}
+.executive-causes .pareto-rank-kg{font-size:8px!important}
+.executive-causes .pareto-rank-pct{font-size:9px!important}
+.executive-causes .ranking-footer{font-size:9px!important;padding-top:7px!important;margin-top:5px!important}
+.executive-causes .insights-row{margin-top:10px!important}
+.executive-causes .insights-row>div{padding:9px 12px!important}
+.executive-causes .insights-row span{font-size:9px!important}
+
+@media(max-width:1000px){
+ .executive-causes .executive-summary{grid-template-columns:1fr!important}
+ .executive-causes .pareto-layout{grid-template-columns:1fr!important}
+ .executive-causes .executive-canvas,
+ .executive-causes #pareto{height:315px!important;min-height:315px!important}
+}
 </style>
 
 <style>
@@ -640,7 +713,7 @@ if($('insightWatch'))$('insightWatch').textContent=rows.length?`Vigilar la tende
 const donutCtx=$('paretoDonut').getContext('2d');if(window.paretoDonutChart)window.paretoDonutChart.destroy();
 window.paretoDonutChart=new Chart(donutCtx,{type:'doughnut',data:{labels:['Prioridad','Resto'],datasets:[{data:[attackAccum,Math.max(0,100-attackAccum)],backgroundColor:['#df4a45','#dfe5e9'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{enabled:false}}}});
 $('paretoRankingList').innerHTML=rows.map((r,i)=>`<div class="pareto-rank-row ${i<attackCount?'priority':''} ${i===attackCount-1?'attack-end':''}"><span class="pareto-rank-num">${i+1}</span><span><span class="pareto-rank-name">${escapeHtml(r.cause)}</span><span class="pareto-rank-kg">${r.kg.toLocaleString('en-US',{maximumFractionDigits:1})} kg</span></span><span class="pareto-rank-pct">${(r.kg/total*100).toFixed(2)}%</span></div>`).join('');
-chart('pareto','bar',{labels:rows.map(r=>r.cause),datasets:[{type:'bar',data:rows.map(r=>+r.kg.toFixed(1)),backgroundColor:rows.map((r,i)=>i<attackCount?'#17638f':'#b9c0c5'),borderRadius:4},{type:'line',data:rows.map(r=>r.pct),borderColor:'#e68a22',pointBackgroundColor:rows.map((r,i)=>i===attackCount-1?'#df4a45':'#e68a22'),pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:rows.map((r,i)=>i===attackCount-1?7:3),yAxisID:'y1',tension:.25}]},{plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.type==='line'?ctx.raw.toFixed(1)+'% acumulado':ctx.raw.toLocaleString('en-US',{maximumFractionDigits:1})+' kg'}}},scales:{x:{ticks:{maxRotation:38,minRotation:38,font:{size:8}},grid:{display:false}},y:{beginAtZero:true,grid:{color:'#edf2f5'},ticks:{callback:v=>Number(v).toLocaleString('en-US')+' kg',font:{size:9}}},y1:{position:'right',beginAtZero:true,max:100,grid:{display:false},ticks:{callback:v=>v+'%',font:{size:8}}}}});
+chart('pareto','bar',{labels:rows.map(r=>r.cause),datasets:[{type:'bar',data:rows.map(r=>+r.kg.toFixed(1)),backgroundColor:rows.map((r,i)=>i<attackCount?'#2d7398':'#c4ccd1'),borderRadius:5,barPercentage:.72,categoryPercentage:.78},{type:'line',data:rows.map(r=>r.pct),borderColor:'#e68a22',pointBackgroundColor:rows.map((r,i)=>i===attackCount-1?'#df4a45':'#e68a22'),pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:rows.map((r,i)=>i===attackCount-1?6:2.5),yAxisID:'y1',tension:.25}]},{plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.type==='line'?ctx.raw.toFixed(1)+'% acumulado':ctx.raw.toLocaleString('en-US',{maximumFractionDigits:1})+' kg'}}},scales:{x:{ticks:{maxRotation:38,minRotation:38,font:{size:8}},grid:{display:false}},y:{beginAtZero:true,grid:{color:'#edf2f5'},ticks:{callback:v=>Number(v).toLocaleString('en-US')+' kg',font:{size:9}}},y1:{position:'right',beginAtZero:true,max:100,grid:{display:false},ticks:{callback:v=>v+'%',font:{size:8}}}}});
  const cl=aggregate(rf,'CLIENTE').slice(0,8);chart('client','bar',{labels:cl.map(x=>x[0]),datasets:[{data:cl.map(x=>+x[1].toFixed(1)),backgroundColor:'#438f8e',borderRadius:5}]},{indexAxis:'y',scales:{x:{grid:{color:'#edf2f5'}},y:{grid:{display:false},ticks:{font:{size:8}}}}});
  const weekMap={};rf.forEach(r=>{const w=String(r.SEMANA??'').trim();if(!w)return;if(!weekMap[w])weekMap[w]={k:0,v:0};weekMap[w].k+=num(r.KILOS_RECHAZO_DASHBOARD)});lf.forEach(r=>{const w=String(r.SEMANA??'').trim();if(!w)return;if(!weekMap[w])weekMap[w]={k:0,v:0};weekMap[w].v+=num(r.LIBERADO_KG_DASHBOARD)});const ws=Object.keys(weekMap).sort(sortWeeks);const weekValues=ws.map(w=>weekMap[w].v?+(weekMap[w].k/weekMap[w].v*100).toFixed(2):null);const latestWeek=weekValues.length?weekValues[weekValues.length-1]:NaN;const [wsc,wst]=trendStatus(latestWeek);const wse=$('weekTrendStatus');wse.className='trend-status weekly '+wsc;wse.textContent=wst;const weekLabels=ws.map(x=>{const m=String(x).match(/(\d+)(?:\D*)$/);return m?'Sem '+String(parseInt(m[1],10)).padStart(2,'0'):x});const weekPointColors=weekValues.map(v=>Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#9aaab6');chart('weekTrend','line',{labels:weekLabels,datasets:[{label:'% rechazo',data:weekValues,borderColor:'#6f8798',backgroundColor:'rgba(63,142,141,.08)',pointRadius:4,pointHoverRadius:7,pointBackgroundColor:weekPointColors,pointBorderColor:'#fff',pointBorderWidth:2,borderWidth:3,tension:.22,fill:true,segment:{borderColor:ctx=>{const v=ctx.p1?.parsed?.y;return Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#6f8798';}}},{label:'Meta 5%',data:ws.map(()=>5),borderColor:'#7d8d9b',borderDash:[6,5],borderWidth:2,pointRadius:0,fill:false,tension:0}]},{scales:{y:{beginAtZero:true,suggestedMax:Math.max(10,Math.ceil((Math.max(...weekValues.filter(Number.isFinite),5)||10)/5)*5),ticks:{callback:v=>v+'%'},grid:{color:'#e8eef2'}},x:{grid:{display:false},ticks:{maxRotation:45,minRotation:0,autoSkip:true,font:{size:9}}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.label==='Meta 5%'?'Meta: 5%':(Number.isFinite(ctx.raw)?ctx.raw.toFixed(2)+'% rechazo':'Sin datos')}}}});
 const bt=aggregate(rf,'BATCH').sort((a,b)=>b[1]-a[1]).slice(0,10);
