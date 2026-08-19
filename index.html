@@ -70,6 +70,15 @@
 <div class="insight" id="insight">Lectura ejecutiva: esperando datos…</div>
 </div>
 <script>
+function formatMonthLabel(value){
+  const s=String(value??'');
+  const m=s.match(/^(\\d{4})-(\\d{1,2})$/);
+  if(!m) return s;
+  const names=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const idx=Number(m[2])-1;
+  return idx>=0 && idx<12 ? `${names[idx]} ${m[1]}` : s;
+}
+
 const DATA_URL='./DATA_DASHBOARD_CALIDAD_2026.xlsx'; let LIB=[], REJ=[], charts={};
 const state={months:new Set(),weeks:new Set(),clients:new Set(),areas:new Set(),causes:new Set(),telas:new Set()};
 const $=id=>document.getElementById(id); const num=v=>Number(v)||0; const fmt=(v,d=0)=>new Intl.NumberFormat('en-US',{minimumFractionDigits:d,maximumFractionDigits:d}).format(v); const pct=v=>(v*100).toFixed(2)+'%';
