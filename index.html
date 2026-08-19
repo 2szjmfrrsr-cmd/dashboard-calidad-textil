@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V21 TOP 10 BATCHES AL FINAL -->
 <!-- VERSION: V20 ETIQUETAS DATOS TENDENCIA SEMANAL -->
 <!-- VERSION: V19 CLIENTE RANKING EJECUTIVO -->
 <!-- VERSION: V18 LINEA META 5% REAL EN CHART.JS -->
@@ -971,6 +972,196 @@
   .client-rank-bar{grid-column:2/4!important;grid-row:2!important}
 }
 
+
+/* === V21: TOP 10 BATCHES AL FINAL DEL DASHBOARD === */
+.batch-section{
+  margin-top:14px!important;
+  padding:14px 16px 12px!important;
+  background:#fff!important;
+  border:1px solid #dce7ee!important;
+  border-radius:12px!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+.batch-section-head{
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  margin-bottom:8px!important;
+}
+.batch-section-head h3{
+  margin:0!important;
+  color:#123b5b!important;
+  font-size:14px!important;
+  line-height:1.2!important;
+}
+.batch-section-head span:not(.badge){
+  display:block!important;
+  margin-top:4px!important;
+  color:#6c8392!important;
+  font-size:9px!important;
+}
+.batch-section .batch-list{
+  max-height:390px!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  border-top:1px solid #e5edf1!important;
+}
+.batch-section .batch-head,
+.batch-section .batch-row{
+  display:grid!important;
+  grid-template-columns:28px 26px minmax(150px,1fr) 125px 95px 92px 34px!important;
+  gap:8px!important;
+  align-items:center!important;
+  box-sizing:border-box!important;
+}
+.batch-section .batch-head{
+  min-height:30px!important;
+  padding:6px 4px!important;
+  color:#6b8190!important;
+  font-size:8px!important;
+  font-weight:900!important;
+  letter-spacing:.25px!important;
+  text-transform:uppercase!important;
+}
+.batch-section .batch-row{
+  min-height:42px!important;
+  padding:7px 4px!important;
+  border-bottom:1px solid #edf2f5!important;
+  color:#123b5b!important;
+  font-size:10px!important;
+}
+.batch-section .batch-row:hover{
+  background:#f7fafc!important;
+}
+.batch-section .batch-row.multi-event{
+  background:linear-gradient(90deg,#fffaf0,#fff)!important;
+}
+.batch-section .rankno{
+  font-weight:900!important;
+}
+.batch-section .chev{
+  font-size:15px!important;
+  color:#4e6f88!important;
+  text-align:center!important;
+}
+.batch-section .batch-name{
+  font-weight:850!important;
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+.batch-section .kg{
+  text-align:right!important;
+  font-weight:900!important;
+  white-space:nowrap!important;
+}
+.batch-section .rework-count{
+  justify-self:center!important;
+  min-width:28px!important;
+  padding:4px 7px!important;
+  border-radius:9px!important;
+  text-align:center!important;
+  font-weight:900!important;
+  background:#eef4f7!important;
+  color:#2a6688!important;
+}
+.batch-section .rework-count.warn{
+  background:#fff1d5!important;
+  color:#a66b00!important;
+}
+.batch-section .rework-count.alert{
+  background:#ffe4e4!important;
+  color:#b83e3e!important;
+}
+.batch-section .detail-btn{
+  width:28px!important;
+  height:28px!important;
+  border:1px solid #cbdde7!important;
+  border-radius:7px!important;
+  background:#fff!important;
+  color:#27617f!important;
+  cursor:pointer!important;
+}
+.batch-section .batch-detail{
+  margin:0 0 7px 54px!important;
+  padding:10px 12px!important;
+  background:#f8fafb!important;
+  border:1px solid #dce7ee!important;
+  border-radius:9px!important;
+  display:none!important;
+  overflow:hidden!important;
+}
+.batch-section .batch-detail.open{
+  display:block!important;
+}
+.batch-section .batch-detail-title{
+  margin-bottom:8px!important;
+  color:#174363!important;
+  font-size:10px!important;
+  font-weight:900!important;
+}
+.batch-section .batch-events{
+  display:grid!important;
+  grid-template-columns:45px 90px minmax(130px,1fr) 115px 105px 90px!important;
+  gap:8px!important;
+  align-items:center!important;
+}
+.batch-section .batch-events.head{
+  padding-bottom:5px!important;
+  color:#738895!important;
+  font-size:8px!important;
+  font-weight:900!important;
+  border-bottom:1px solid #e1e9ed!important;
+}
+.batch-section .batch-events.row{
+  min-height:30px!important;
+  color:#244b67!important;
+  font-size:9px!important;
+  border-bottom:1px solid #edf2f5!important;
+}
+.batch-section .event-kg{
+  text-align:right!important;
+  font-weight:850!important;
+  white-space:nowrap!important;
+}
+.batch-section .event-result{
+  color:#a66b00!important;
+  font-weight:850!important;
+}
+@media(max-width:900px){
+  .batch-section .batch-head,
+  .batch-section .batch-row{
+    grid-template-columns:25px 22px minmax(100px,1fr) 95px 72px 75px 30px!important;
+    gap:5px!important;
+  }
+}
+@media(max-width:650px){
+  .batch-section{
+    padding:11px!important;
+  }
+  .batch-section .batch-head,
+  .batch-section .batch-row{
+    grid-template-columns:22px 18px minmax(95px,1fr) 78px 55px 30px!important;
+  }
+  .batch-section .batch-head span:nth-child(6),
+  .batch-section .batch-row .badge{
+    display:none!important;
+  }
+  .batch-section .batch-head span:nth-child(7),
+  .batch-section .detail-btn{
+    grid-column:6!important;
+  }
+  .batch-section .batch-events{
+    grid-template-columns:35px 70px minmax(100px,1fr) 90px!important;
+  }
+  .batch-section .batch-events span:nth-child(5),
+  .batch-section .batch-events span:nth-child(6){
+    display:none!important;
+  }
+}
 </style>
 
 <style>
@@ -1067,8 +1258,20 @@
   </div>
 </div>
 <div class="canvasbox"></div></div><div class="chartcard"><div class="charthead"><div><h3>Tendencia semanal — % rechazo</h3><span>Señal de corto plazo frente a la meta del 5%</span></div><div><span class="badge">META ≤ 5%</span><span id="weekTrendStatus" class="trend-status weekly neutral">SIN DATOS</span></div></div><div class="canvasbox"><canvas id="weekTrend"></canvas></div></div></section>
-<div id="batchTable" style="display:none!important"></div>
+
 <div class="insight" id="insight">Lectura ejecutiva: esperando datos…</div>
+
+<section class="batch-section">
+  <div class="batch-section-head">
+    <div>
+      <h3>Top 10 batches rechazados</h3>
+      <span>Magnitud por lote · número de eventos de rechazo / reprocesos</span>
+    </div>
+    <span class="badge">REPROCESOS</span>
+  </div>
+  <div id="batchTable"></div>
+</section>
+
 </div>
 <script>
 function formatMonthLabel(value){
