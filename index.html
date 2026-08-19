@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V33 CURVA SUTIL -->
 <!-- VERSION: V32 CURVA DE TENDENCIA -->
 <!-- VERSION: V31 MESES EN TEXTO -->
 <!-- VERSION: V30 FIX NULL INNERHTML -->
@@ -2126,16 +2127,17 @@ function renderCharts(lf,rf){
     tension:.25
    },
    {
-    label:'Curva de tendencia',
+    label:'Tendencia',
     data:trendCurve,
-    borderColor:'#6f4bb2',
+    borderColor:'#7b8794',
     backgroundColor:'transparent',
-    borderWidth:2.5,
-    borderDash:[7,5],
+    borderWidth:1.5,
+    borderDash:[5,5],
     pointRadius:0,
     pointHoverRadius:0,
+    pointHitRadius:8,
     fill:false,
-    tension:.15
+    tension:0
    }
   ]
  },{maintainAspectRatio:false,
@@ -2144,7 +2146,7 @@ function renderCharts(lf,rf){
       display:true,
       position:'top',
       align:'start',
-      labels:{boxWidth:18,boxHeight:2,padding:14,font:{size:9,weight:'700'}}
+      labels:{boxWidth:14,boxHeight:1,padding:12,font:{size:8,weight:'600'}}
     },
     tooltip:{
       callbacks:{
