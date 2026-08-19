@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V26 TABLA LOTES GERENCIAL -->
 <!-- VERSION: V25 TITULO EJECUTIVO -->
 <!-- VERSION: V24 LOTES CRITICOS EJECUTIVO -->
 <!-- VERSION: V23 LAYOUT DOS GRAFICAS CORREGIDO -->
@@ -1473,6 +1474,111 @@
   .hero-copy h1{font-size:20px}
   .hero-copy::after{font-size:8px;margin-top:5px}
 }
+
+/* === V26: TABLA GERENCIAL DE LOTES === */
+.executive-batches .batch-head,
+.executive-batches .batch-row{
+  grid-template-columns:28px 22px 145px 135px 130px 110px 72px 78px 90px 34px!important;
+  gap:7px!important;
+}
+.executive-batches .batch-head{
+  min-height:31px!important;
+  padding:6px 4px!important;
+  font-size:7px!important;
+  color:#6f8290!important;
+}
+.executive-batches .batch-row{
+  min-height:44px!important;
+  padding:7px 4px!important;
+  font-size:9px!important;
+  background:#fff!important;
+}
+.executive-batches .batch-row.multi-event{
+  background:linear-gradient(90deg,#fff9ed 0%,#fff 65%)!important;
+}
+.executive-batches .batch-row:hover{
+  background:#f5f9fb!important;
+}
+.batch-client,.batch-fabric{
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  color:#315a74!important;
+  font-size:8.5px!important;
+  font-weight:750!important;
+}
+.batch-fabric{
+  color:#56768a!important;
+  font-weight:650!important;
+}
+.batch-share{
+  text-align:right!important;
+  color:#4e6d82!important;
+  font-size:9px!important;
+  font-weight:850!important;
+  white-space:nowrap!important;
+}
+.batch-priority{
+  justify-self:center!important;
+  padding:4px 7px!important;
+  border-radius:7px!important;
+  font-size:7px!important;
+  font-weight:900!important;
+  text-transform:uppercase!important;
+  white-space:nowrap!important;
+}
+.batch-priority.critical{
+  background:#ffe1df!important;
+  color:#c63e3a!important;
+}
+.batch-priority.attention{
+  background:#ffedc7!important;
+  color:#9a6700!important;
+}
+.batch-priority.normal{
+  background:#edf3f6!important;
+  color:#607c8f!important;
+}
+.executive-batches .batch-head span:nth-child(6),
+.executive-batches .batch-head span:nth-child(7),
+.executive-batches .batch-row .kg,
+.executive-batches .batch-row .batch-share{
+  text-align:right!important;
+}
+.executive-batches .batch-head span:nth-child(8),
+.executive-batches .batch-head span:nth-child(9){
+  text-align:center!important;
+}
+.executive-batches .batch-list{
+  max-height:430px!important;
+}
+@media(max-width:1200px){
+  .executive-batches .batch-head,.executive-batches .batch-row{
+    grid-template-columns:25px 20px 125px 110px 105px 100px 65px 72px 82px 30px!important;
+    gap:5px!important;
+  }
+}
+@media(max-width:900px){
+  .executive-batches .batch-head,.executive-batches .batch-row{
+    grid-template-columns:23px 18px 120px 105px 95px 90px 60px 65px 75px 30px!important;
+    gap:4px!important;
+  }
+  .batch-client,.batch-fabric{font-size:8px!important}
+}
+@media(max-width:700px){
+  .executive-batches .batch-head,.executive-batches .batch-row{
+    grid-template-columns:22px 18px 115px 90px 85px 82px 55px 60px 30px!important;
+  }
+  .executive-batches .batch-head span:nth-child(5),
+  .executive-batches .batch-row .batch-fabric{
+    display:none!important;
+  }
+  .executive-batches .batch-head span:nth-child(9),
+  .executive-batches .batch-row .batch-priority{
+    display:none!important;
+  }
+}
 </style>
 
 <style>
@@ -2064,19 +2170,86 @@ chart('pareto','bar',{labels:rows.map(r=>r.cause),datasets:[{type:'bar',data:row
  const cl=aggregate(rf,'CLIENTE').slice(0,8);
 
 const weekMap={};rf.forEach(r=>{const w=String(r.SEMANA??'').trim();if(!w)return;if(!weekMap[w])weekMap[w]={k:0,v:0};weekMap[w].k+=num(r.KILOS_RECHAZO_DASHBOARD)});lf.forEach(r=>{const w=String(r.SEMANA??'').trim();if(!w)return;if(!weekMap[w])weekMap[w]={k:0,v:0};weekMap[w].v+=num(r.LIBERADO_KG_DASHBOARD)});const ws=Object.keys(weekMap).sort(sortWeeks);const weekValues=ws.map(w=>weekMap[w].v?+(weekMap[w].k/weekMap[w].v*100).toFixed(2):null);const latestWeek=weekValues.length?weekValues[weekValues.length-1]:NaN;const [wsc,wst]=trendStatus(latestWeek);const wse=$('weekTrendStatus');wse.className='trend-status weekly '+wsc;wse.textContent=wst;const weekLabels=ws.map(x=>{const m=String(x).match(/(\d+)(?:\D*)$/);return m?'Sem '+String(parseInt(m[1],10)).padStart(2,'0'):x});const weekPointColors=weekValues.map(v=>Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#9aaab6');chart('weekTrend','line',{labels:weekLabels,datasets:[{label:'% rechazo',data:weekValues,borderColor:'#6f8798',backgroundColor:'rgba(63,142,141,.08)',pointRadius:4,pointHoverRadius:7,pointBackgroundColor:weekPointColors,pointBorderColor:'#fff',pointBorderWidth:2,borderWidth:3,tension:.22,fill:true,segment:{borderColor:ctx=>{const v=ctx.p1?.parsed?.y;return Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#6f8798';}}},{label:'Meta 5%',data:ws.map(()=>5),borderColor:'#7d8d9b',borderDash:[6,5],borderWidth:2,pointRadius:0,fill:false,tension:0}]},{scales:{y:{beginAtZero:true,suggestedMax:Math.max(10,Math.ceil((Math.max(...weekValues.filter(Number.isFinite),5)||10)/5)*5),ticks:{callback:v=>v+'%'},grid:{color:'#e8eef2'}},x:{grid:{display:false},ticks:{maxRotation:45,minRotation:0,autoSkip:true,font:{size:9}}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.label==='Meta 5%'?'Meta: 5%':(Number.isFinite(ctx.raw)?ctx.raw.toFixed(2)+'% rechazo':'Sin datos')}}}});
+
 const bt=aggregate(rf,'BATCH').sort((a,b)=>b[1]-a[1]).slice(0,10);
+const totalRejectKg=rf.reduce((s,r)=>s+num(r.KILOS_RECHAZO_DASHBOARD),0);
 const batchRows=bt.map((x,i)=>{
    const batch=String(x[0]);
    const events=rf.filter(r=>String(r.BATCH??'').trim()===batch);
    const count=events.length;
    const countClass=count>=3?'alert':count===2?'warn':'';
+
+   const clients=[...new Set(events.map(r=>String(r.CLIENTE??'').trim()).filter(Boolean))];
+   const fabrics=[...new Set(events.map(r=>String(r.TELA??'').trim()).filter(Boolean))];
+   const client=clients.length?clients.join(' / '):'—';
+   const fabric=fabrics.length?fabrics.join(' / '):'—';
+   const pctTotal=totalRejectKg?x[1]/totalRejectKg*100:0;
+   const priority=count>=3?'CRÍTICO':(pctTotal>=3||count===2?'ATENCIÓN':'SEGUIMIENTO');
+   const priorityClass=count>=3?'critical':(pctTotal>=3||count===2?'attention':'normal');
+
    const detail=events.map((r,j)=>`<div class="batch-events row"><span>${j+1}</span><span>${esc(dateLabel(r['FECHA RECHAZO']))}</span><span title="${esc(r.CAUSA??'')}">${esc(r.CAUSA??'—')}</span><span class="event-kg">${fmt(num(r.KILOS_RECHAZO_DASHBOARD),1)} kg</span><span>${esc(r['AREA RESPONSABLE']??'—')}</span><span class="event-result">${esc(r.RESOLUCION??'RECHAZO')}</span></div>`).join('');
-   return `<div class="batch-row ${count>1?'multi-event':''}" data-batch="${esc(batch)}"><span class="rankno">${i+1}</span><span class="chev">›</span><span class="batch-name">Batch ${esc(batch)}</span><span class="kg">${fmt(x[1],1)} kg</span><span class="rework-count ${countClass}">${count}</span><span class="badge">RECHAZO</span><button class="detail-btn" type="button" data-toggle-batch="${esc(batch)}">›</button></div><div class="batch-detail" id="detail-${esc(batch)}"><div class="batch-detail-title">${count>1?'Detalle de eventos de rechazo':'Detalle del evento de rechazo'}</div><div class="batch-events head"><span>EVENTO</span><span>FECHA</span><span>CAUSA</span><span>KG RECHAZADOS</span><span>ÁREA</span><span>RESULTADO</span></div>${detail}<div class="batch-total"><span>Total rechazado del batch</span><span>${fmt(x[1],1)} kg</span></div></div>`;
- }).join('');
- $('batchTable').innerHTML=bt.length
-  ? '<div class="batch-head"><span>#</span><span></span><span>BATCH</span><span>KG RECHAZADOS</span><span>REPROCESOS</span><span>ESTADO</span><span></span></div><div class="batch-list">'+batchRows+'</div>'
-  : '<div class="sub">Sin datos</div>';
- $('batchTable').querySelectorAll('[data-toggle-batch]').forEach(btn=>btn.onclick=()=>{const d=$('detail-'+btn.dataset.toggleBatch);const open=d.classList.toggle('open');btn.textContent=open?'⌃':'›';const row=btn.closest('.batch-row');row.querySelector('.chev').textContent=open?'⌄':'›'});
+
+   return `<div class="batch-row ${count>1?'multi-event':''}" data-batch="${esc(batch)}">
+      <span class="rankno">${i+1}</span>
+      <span class="chev">›</span>
+      <span class="batch-name">Batch ${esc(batch)}</span>
+      <span class="batch-client" title="${esc(client)}">${esc(client)}</span>
+      <span class="batch-fabric" title="${esc(fabric)}">${esc(fabric)}</span>
+      <span class="kg">${fmt(x[1],1)} kg</span>
+      <span class="batch-share">${pctTotal.toFixed(1)}%</span>
+      <span class="rework-count ${countClass}">${count}x</span>
+      <span class="batch-priority ${priorityClass}">${priority}</span>
+      <button class="detail-btn" type="button" data-toggle-batch="${esc(batch)}">›</button>
+   </div>
+   <div class="batch-detail" id="detail-${esc(batch)}">
+      <div class="batch-detail-title">${count>1?'Detalle de eventos de rechazo':'Detalle del evento de rechazo'}</div>
+      <div class="batch-events head"><span>EVENTO</span><span>FECHA</span><span>CAUSA</span><span>KG RECHAZADOS</span><span>ÁREA</span><span>RESULTADO</span></div>
+      ${detail}
+      <div class="batch-total"><span>Total rechazado del batch</span><span>${fmt(x[1],1)} kg</span></div>
+   </div>`;
+}).join('');
+
+$('batchTable').innerHTML=bt.length
+ ? '<div class="batch-head"><span>#</span><span></span><span>BATCH</span><span>CLIENTE</span><span>TIPO DE TELA</span><span>KG RECHAZADOS</span><span>% TOTAL</span><span>REPROCESOS</span><span>PRIORIDAD</span><span></span></div><div class="batch-list">'+batchRows+'</div>'
+ : '<div class="sub">Sin datos</div>';
+
+$('batchTable').querySelectorAll('[data-toggle-batch]').forEach(btn=>btn.onclick=()=>{
+  const d=$('detail-'+btn.dataset.toggleBatch);
+  const open=d.classList.toggle('open');
+  btn.textContent=open?'⌃':'›';
+  const row=btn.closest('.batch-row');
+  row.querySelector('.chev').textContent=open?'⌄':'›';
+});
+
+const criticalCount=bt.filter(x=>{
+  const events=rf.filter(r=>String(r.BATCH??'').trim()===String(x[0]));
+  return events.length>=3;
+}).length;
+$('batchSummaryCount').textContent=bt.length||'—';
+$('batchSummaryReworks').textContent=bt.reduce((s,x)=>{
+  return s+rf.filter(r=>String(r.BATCH??'').trim()===String(x[0])).length;
+},0)||'—';
+$('batchSummaryCritical').textContent=criticalCount||'0';
+$('batchPriorityText').textContent=criticalCount
+ ? `${criticalCount} lote${criticalCount===1?'':'s'} con 3+ reprocesos requieren revisión de causa.`
+ : 'No hay lotes con 3+ reprocesos en la selección actual.';
+
+const topCards=bt.slice(0,3);
+const cards=$('batchCriticalCards');
+if(cards){
+  const maxKg=bt[0]?.[1]||1;
+  cards.innerHTML=topCards.map((x,i)=>{
+    const events=rf.filter(r=>String(r.BATCH??'').trim()===String(x[0]));
+    const count=events.length;
+    const priority=count>=3?'critical':'attention';
+    return `<div class="batch-critical-card priority-${priority}">
+      <div class="batch-critical-top"><div class="batch-critical-rank">${i+1}</div><span class="batch-critical-priority">${count>=3?'CRÍTICO':'ATENCIÓN'}</span></div>
+      <div class="batch-critical-name">Batch ${esc(String(x[0]))}</div>
+      <div class="batch-critical-values"><div class="batch-critical-kg">${fmt(x[1],1)} kg</div><div class="batch-critical-rework"><b>${count}x</b><br>reprocesos</div></div>
+      <div class="batch-critical-bar"><div class="batch-critical-bar-fill" style="width:${Math.max(3,x[1]/maxKg*100)}%"></div></div>
+    </div>`;
+  }).join('');
+}
  const top=ar[0], topCause=cs[0];$('insight').innerHTML=top?`<b>Lectura ejecutiva:</b> <b>${esc(top[0])}</b> concentra <b>${pct(top[1]/Math.max(1,rf.reduce((s,r)=>s+num(r.KILOS_RECHAZO_DASHBOARD),0)))}</b> del rechazo seleccionado. La principal causa es <b>${topCause?esc(topCause[0]):'—'}</b>.`:'<b>Lectura ejecutiva:</b> no hay rechazos en la selección actual.';
 }
 function apply(){const [lf,rf]=filters();renderKpis(lf,rf);renderCharts(lf,rf);$('summary').textContent=`${fmt(lf.length)} registros liberación · ${fmt(rf.length)} registros rechazo · KPI según selección`}
