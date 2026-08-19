@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V19 CLIENTE RANKING EJECUTIVO -->
 <!-- VERSION: V18 LINEA META 5% REAL EN CHART.JS -->
 <!-- VERSION: V17 SOLO 2 GRAFICAS EN FILA -->
 <!-- VERSION: V16 KG RECHAZADOS EN KILOS -->
@@ -823,6 +824,152 @@
   }
 }
 
+
+/* === V19: RECHAZO POR CLIENTE — RANKING EJECUTIVO === */
+.client-ranking-card{
+  min-width:0!important;
+  overflow:hidden!important;
+}
+.client-ranking{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:0!important;
+  margin-top:5px!important;
+}
+.client-rank-row{
+  display:grid!important;
+  grid-template-columns:28px 112px minmax(70px,1fr) 100px 62px!important;
+  align-items:center!important;
+  gap:9px!important;
+  min-width:0!important;
+  min-height:35px!important;
+  padding:5px 4px!important;
+  border-bottom:1px solid #e7edf1!important;
+  box-sizing:border-box!important;
+}
+.client-rank-row:first-child{
+  background:linear-gradient(90deg,#fff5f4 0%,#ffffff 72%)!important;
+  border-radius:8px!important;
+  border-bottom-color:#f0d6d4!important;
+}
+.client-rank-num{
+  width:25px!important;
+  height:25px!important;
+  border-radius:50%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:#aeb9c0!important;
+  color:#fff!important;
+  font-size:10px!important;
+  font-weight:900!important;
+}
+.client-rank-row:first-child .client-rank-num{
+  background:#df4a45!important;
+}
+.client-rank-name{
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  color:#123b5b!important;
+  font-size:10px!important;
+  font-weight:850!important;
+}
+.client-rank-bar{
+  height:9px!important;
+  min-width:20px!important;
+  background:#e9eef2!important;
+  border-radius:999px!important;
+  overflow:hidden!important;
+}
+.client-rank-fill{
+  height:100%!important;
+  min-width:3px!important;
+  border-radius:999px!important;
+  background:#3f9694!important;
+}
+.client-rank-row:first-child .client-rank-fill{
+  background:#df4a45!important;
+}
+.client-rank-kg{
+  text-align:right!important;
+  white-space:nowrap!important;
+  color:#123b5b!important;
+  font-size:10px!important;
+  font-weight:850!important;
+}
+.client-rank-pct{
+  text-align:right!important;
+  white-space:nowrap!important;
+  color:#55718a!important;
+  font-size:10px!important;
+  font-weight:800!important;
+}
+.client-rank-row:first-child .client-rank-pct{
+  color:#df4a45!important;
+}
+.client-ranking-summary{
+  display:grid!important;
+  grid-template-columns:32px minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:9px!important;
+  margin-top:10px!important;
+  padding:8px 10px!important;
+  border-left:3px solid #df4a45!important;
+  border-radius:7px!important;
+  background:#fff7f6!important;
+  box-sizing:border-box!important;
+}
+.client-summary-icon{
+  width:28px!important;
+  height:28px!important;
+  border-radius:50%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:#ffe0de!important;
+  font-size:13px!important;
+}
+.client-ranking-summary strong{
+  display:block!important;
+  color:#df4a45!important;
+  font-size:9px!important;
+  text-transform:uppercase!important;
+  letter-spacing:.3px!important;
+}
+.client-ranking-summary span{
+  display:block!important;
+  color:#6a8191!important;
+  font-size:8px!important;
+  margin-top:2px!important;
+}
+.client-summary-value{
+  color:#df4a45!important;
+  font-size:18px!important;
+  font-weight:900!important;
+  white-space:nowrap!important;
+}
+@media(max-width:1050px){
+  .client-rank-row{
+    grid-template-columns:26px 95px minmax(50px,1fr) 88px 52px!important;
+    gap:6px!important;
+  }
+  .client-rank-name,.client-rank-kg,.client-rank-pct{font-size:9px!important}
+}
+@media(max-width:850px){
+  .client-rank-row{
+    grid-template-columns:26px minmax(90px,1fr) auto!important;
+    grid-template-rows:auto 8px!important;
+    gap:4px 7px!important;
+    padding:7px 4px!important;
+  }
+  .client-rank-name{grid-column:2!important}
+  .client-rank-kg{grid-column:3!important}
+  .client-rank-pct{display:none!important}
+  .client-rank-bar{grid-column:2/4!important;grid-row:2!important}
+}
+
 </style>
 
 <style>
@@ -897,7 +1044,28 @@
 </div>
 <div class="insights-row"><div><b>ENFOCA TUS RECURSOS</b><span id="insightFocus">—</span></div><div><b>IMPACTO</b><span id="insightImpact">—</span></div><div><b>VIGILAR</b><span id="insightWatch">—</span></div></div>
 </section>
-<section class="grid2 executive-two-charts"><div class="chartcard"><div class="charthead"><div><h3>Rechazo por cliente — Top 8</h3><span>Impacto acumulado</span></div></div><div class="canvasbox"><canvas id="client"></canvas></div></div><div class="chartcard"><div class="charthead"><div><h3>Tendencia semanal — % rechazo</h3><span>Señal de corto plazo frente a la meta del 5%</span></div><div><span class="badge">META ≤ 5%</span><span id="weekTrendStatus" class="trend-status weekly neutral">SIN DATOS</span></div></div><div class="canvasbox"><canvas id="weekTrend"></canvas></div></div></section>
+<section class="grid2 executive-two-charts">
+<div class="chartcard client-ranking-card">
+  <div class="charthead">
+    <div>
+      <h3>Rechazo por cliente — Top 8</h3>
+      <span>Impacto acumulado</span>
+    </div>
+    <span class="badge">KG</span>
+  </div>
+
+  <div class="client-ranking" id="clientRanking"></div>
+
+  <div class="client-ranking-summary" id="clientRankingSummary">
+    <div class="client-summary-icon">🎯</div>
+    <div>
+      <strong id="clientSummaryTitle">Principal cliente</strong>
+      <span id="clientSummaryText">Mayor concentración del rechazo</span>
+    </div>
+    <div class="client-summary-value" id="clientSummaryValue">—</div>
+  </div>
+</div>
+<div class="canvasbox"></div></div><div class="chartcard"><div class="charthead"><div><h3>Tendencia semanal — % rechazo</h3><span>Señal de corto plazo frente a la meta del 5%</span></div><div><span class="badge">META ≤ 5%</span><span id="weekTrendStatus" class="trend-status weekly neutral">SIN DATOS</span></div></div><div class="canvasbox"><canvas id="weekTrend"></canvas></div></div></section>
 <div id="batchTable" style="display:none!important"></div>
 <div class="insight" id="insight">Lectura ejecutiva: esperando datos…</div>
 </div>
@@ -1251,8 +1419,36 @@ const donutCtx=$('paretoDonut').getContext('2d');if(window.paretoDonutChart)wind
 window.paretoDonutChart=new Chart(donutCtx,{type:'doughnut',data:{labels:['Prioridad','Resto'],datasets:[{data:[attackAccum,Math.max(0,100-attackAccum)],backgroundColor:['#df4a45','#dfe5e9'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'82%',plugins:{legend:{display:false},tooltip:{enabled:false}}}});
 $('paretoRankingList').innerHTML=rows.map((r,i)=>`<div class="pareto-rank-row ${i<attackCount?'priority':''} ${i===attackCount-1?'attack-end':''}"><span class="pareto-rank-num">${i+1}</span><span><span class="pareto-rank-name">${escapeHtml(r.cause)}</span><span class="pareto-rank-kg">${r.kg.toLocaleString('en-US',{maximumFractionDigits:1})} kg</span></span><span class="pareto-rank-pct">${(r.kg/total*100).toFixed(2)}%</span></div>`).join('');
 chart('pareto','bar',{labels:rows.map(r=>r.cause),datasets:[{type:'bar',data:rows.map(r=>+r.kg.toFixed(1)),backgroundColor:rows.map((r,i)=>i<attackCount?'#2d7398':'#c4ccd1'),borderRadius:5,barPercentage:.72,categoryPercentage:.78},{type:'line',data:rows.map(r=>r.pct),borderColor:'#e68a22',pointBackgroundColor:rows.map((r,i)=>i===attackCount-1?'#df4a45':'#e68a22'),pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:rows.map((r,i)=>i===attackCount-1?7:2),yAxisID:'y1',tension:.25}]},{plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.type==='line'?ctx.raw.toFixed(1)+'% acumulado':ctx.raw.toLocaleString('en-US',{maximumFractionDigits:1})+' kg'}}},scales:{x:{ticks:{maxRotation:38,minRotation:38,font:{size:8}},grid:{display:false}},y:{beginAtZero:true,grid:{color:'#edf2f5'},ticks:{callback:v=>Number(v).toLocaleString('en-US')+' kg',font:{size:9}}},y1:{position:'right',beginAtZero:true,max:100,grid:{display:false},ticks:{callback:v=>v+'%',font:{size:8}}}}});
- const cl=aggregate(rf,'CLIENTE').slice(0,8);chart('client','bar',{labels:cl.map(x=>x[0]),datasets:[{data:cl.map(x=>+x[1].toFixed(1)),backgroundColor:'#438f8e',borderRadius:5}]},{indexAxis:'y',scales:{x:{grid:{color:'#edf2f5'}},y:{grid:{display:false},ticks:{font:{size:8}}}}});
- const weekMap={};rf.forEach(r=>{const w=String(r.SEMANA??'').trim();if(!w)return;if(!weekMap[w])weekMap[w]={k:0,v:0};weekMap[w].k+=num(r.KILOS_RECHAZO_DASHBOARD)});lf.forEach(r=>{const w=String(r.SEMANA??'').trim();if(!w)return;if(!weekMap[w])weekMap[w]={k:0,v:0};weekMap[w].v+=num(r.LIBERADO_KG_DASHBOARD)});const ws=Object.keys(weekMap).sort(sortWeeks);const weekValues=ws.map(w=>weekMap[w].v?+(weekMap[w].k/weekMap[w].v*100).toFixed(2):null);const latestWeek=weekValues.length?weekValues[weekValues.length-1]:NaN;const [wsc,wst]=trendStatus(latestWeek);const wse=$('weekTrendStatus');wse.className='trend-status weekly '+wsc;wse.textContent=wst;const weekLabels=ws.map(x=>{const m=String(x).match(/(\d+)(?:\D*)$/);return m?'Sem '+String(parseInt(m[1],10)).padStart(2,'0'):x});const weekPointColors=weekValues.map(v=>Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#9aaab6');chart('weekTrend','line',{labels:weekLabels,datasets:[{label:'% rechazo',data:weekValues,borderColor:'#6f8798',backgroundColor:'rgba(63,142,141,.08)',pointRadius:4,pointHoverRadius:7,pointBackgroundColor:weekPointColors,pointBorderColor:'#fff',pointBorderWidth:2,borderWidth:3,tension:.22,fill:true,segment:{borderColor:ctx=>{const v=ctx.p1?.parsed?.y;return Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#6f8798';}}},{label:'Meta 5%',data:ws.map(()=>5),borderColor:'#7d8d9b',borderDash:[6,5],borderWidth:2,pointRadius:0,fill:false,tension:0}]},{scales:{y:{beginAtZero:true,suggestedMax:Math.max(10,Math.ceil((Math.max(...weekValues.filter(Number.isFinite),5)||10)/5)*5),ticks:{callback:v=>v+'%'},grid:{color:'#e8eef2'}},x:{grid:{display:false},ticks:{maxRotation:45,minRotation:0,autoSkip:true,font:{size:9}}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.label==='Meta 5%'?'Meta: 5%':(Number.isFinite(ctx.raw)?ctx.raw.toFixed(2)+'% rechazo':'Sin datos')}}}});
+ const cl=aggregate(rf,'CLIENTE').slice(0,8);
+renderClientRanking(rows){
+  const el=$('clientRanking');
+  if(!el) return;
+  const data=aggregate(rows,'CLIENTE').slice(0,8);
+  const total=data.reduce((s,x)=>s+x[1],0);
+  if(!data.length){
+    el.innerHTML='<div style="padding:25px;text-align:center;color:#718595;font-size:11px">Sin datos para la selección</div>';
+    return;
+  }
+  const max=data[0][1]||1;
+  el.innerHTML=data.map((d,i)=>{
+    const pct=total?d[1]/total*100:0;
+    const width=Math.max(2,d[1]/max*100);
+    return `<div class="client-rank-row">
+      <div class="client-rank-num">${i+1}</div>
+      <div class="client-rank-name" title="${escapeHtml(d[0])}">${escapeHtml(d[0])}</div>
+      <div class="client-rank-bar"><div class="client-rank-fill" style="width:${width}%"></div></div>
+      <div class="client-rank-kg">${fmt(d[1],1)} kg</div>
+      <div class="client-rank-pct">${pct.toFixed(1)}%</div>
+    </div>`;
+  }).join('');
+  const first=data[0];
+  const firstPct=total?first[1]/total*100:0;
+  $('clientSummaryTitle').textContent=first[0];
+  $('clientSummaryText').textContent='Mayor concentración del rechazo';
+  $('clientSummaryValue').textContent=firstPct.toFixed(1)+'%';
+}
+
+const weekMap={};rf.forEach(r=>{const w=String(r.SEMANA??'').trim();if(!w)return;if(!weekMap[w])weekMap[w]={k:0,v:0};weekMap[w].k+=num(r.KILOS_RECHAZO_DASHBOARD)});lf.forEach(r=>{const w=String(r.SEMANA??'').trim();if(!w)return;if(!weekMap[w])weekMap[w]={k:0,v:0};weekMap[w].v+=num(r.LIBERADO_KG_DASHBOARD)});const ws=Object.keys(weekMap).sort(sortWeeks);const weekValues=ws.map(w=>weekMap[w].v?+(weekMap[w].k/weekMap[w].v*100).toFixed(2):null);const latestWeek=weekValues.length?weekValues[weekValues.length-1]:NaN;const [wsc,wst]=trendStatus(latestWeek);const wse=$('weekTrendStatus');wse.className='trend-status weekly '+wsc;wse.textContent=wst;const weekLabels=ws.map(x=>{const m=String(x).match(/(\d+)(?:\D*)$/);return m?'Sem '+String(parseInt(m[1],10)).padStart(2,'0'):x});const weekPointColors=weekValues.map(v=>Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#9aaab6');chart('weekTrend','line',{labels:weekLabels,datasets:[{label:'% rechazo',data:weekValues,borderColor:'#6f8798',backgroundColor:'rgba(63,142,141,.08)',pointRadius:4,pointHoverRadius:7,pointBackgroundColor:weekPointColors,pointBorderColor:'#fff',pointBorderWidth:2,borderWidth:3,tension:.22,fill:true,segment:{borderColor:ctx=>{const v=ctx.p1?.parsed?.y;return Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#6f8798';}}},{label:'Meta 5%',data:ws.map(()=>5),borderColor:'#7d8d9b',borderDash:[6,5],borderWidth:2,pointRadius:0,fill:false,tension:0}]},{scales:{y:{beginAtZero:true,suggestedMax:Math.max(10,Math.ceil((Math.max(...weekValues.filter(Number.isFinite),5)||10)/5)*5),ticks:{callback:v=>v+'%'},grid:{color:'#e8eef2'}},x:{grid:{display:false},ticks:{maxRotation:45,minRotation:0,autoSkip:true,font:{size:9}}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.label==='Meta 5%'?'Meta: 5%':(Number.isFinite(ctx.raw)?ctx.raw.toFixed(2)+'% rechazo':'Sin datos')}}}});
 const bt=aggregate(rf,'BATCH').sort((a,b)=>b[1]-a[1]).slice(0,10);
 const batchRows=bt.map((x,i)=>{
    const batch=String(x[0]);
