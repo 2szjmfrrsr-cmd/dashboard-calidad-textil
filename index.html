@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V35 CURVA SIN ETIQUETAS -->
 <!-- VERSION: V34 SIN ETIQUETA CURVA -->
 <!-- VERSION: V33 CURVA SUTIL -->
 <!-- VERSION: V32 CURVA DE TENDENCIA -->
@@ -1975,6 +1976,7 @@ const executiveDataLabels={
     chart.data.datasets.forEach((ds,di)=>{
       if(ds.type==='line' && chart.canvas.id==='pareto') return;
       if(ds.label==='Meta 5%') return;
+      if(ds.label==='Tendencia' || ds.label==='Curva de tendencia') return;
       const meta=chart.getDatasetMeta(di);
       if(!meta || meta.hidden) return;
       meta.data.forEach((el,i)=>{
@@ -2150,7 +2152,7 @@ function renderCharts(lf,rf){
       labels:{boxWidth:14,boxHeight:1,padding:12,font:{size:8,weight:'600'}}
     },
     tooltip:{
-      filter:ctx=>ctx.dataset.label!=='Tendencia',
+      filter:ctx=>!['Tendencia','Curva de tendencia'].includes(ctx.dataset.label),
       callbacks:{
         label:ctx=>{
           if(ctx.dataset.label==='Curva de tendencia'){
