@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: PARETO EJECUTIVO ZONA DE ATAQUE -->
 <!-- VERSION: TENDENCIA MENSUAL/SEMANAL ADAPTABLE -->
 <!-- VERSION: MES -> SEMANA DEPENDIENTE V1 -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -98,6 +99,29 @@
 
 .trend-mode-note{margin-top:10px;background:#f7fafb;border-left:4px solid #3b8f8e;border-radius:9px;padding:9px 12px;font-size:11px;color:#58728a}
 
+
+/* === PARETO EJECUTIVO / ZONA DE ATAQUE === */
+.pareto-summary{display:grid;grid-template-columns:1.45fr 1fr .75fr 1fr;gap:0;margin:10px 0 16px;border:1px solid #e1eaf0;border-radius:12px;background:#fbfdfe;overflow:hidden}
+.pareto-focus{display:flex;align-items:center;gap:12px;padding:14px 18px;background:linear-gradient(90deg,#f7efff,#fff)}
+.focus-icon{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#eee2ff;color:#7126c9;font-size:28px;font-weight:900}
+.pareto-focus small,.pareto-stat small{display:block;font-size:10px;font-weight:800;color:#58728a;letter-spacing:.25px}
+.pareto-focus strong{display:block;font-size:25px;line-height:1.05;color:#7126c9;margin:2px 0}
+.pareto-focus span,.pareto-stat span{font-size:11px;color:#58728a}
+.pareto-stat{padding:14px 18px;border-left:1px solid #e1eaf0;display:flex;flex-direction:column;justify-content:center}
+.pareto-stat strong{font-size:22px;color:#123f62;margin-top:3px}.pareto-stat.attack strong{color:#d64242}
+.pareto-layout{display:grid;grid-template-columns:minmax(0,1fr) 285px;gap:18px;align-items:stretch}.pareto-chart-wrap{min-width:0}
+.pareto-legend{display:flex;gap:20px;font-size:11px;color:#425d73;margin:0 0 4px 8px}.pareto-legend i{display:inline-block;vertical-align:middle;margin-right:5px}
+.legend-bar{width:12px;height:9px;border-radius:2px;background:#17638f}.legend-line{width:16px;height:3px;border-radius:3px;background:#e68a22}
+.pareto-executive .canvasbox.tall{height:400px}.pareto-executive #pareto{height:400px!important}
+.pareto-attack-note{margin:8px 0 0;padding:10px 13px;border-left:4px solid #2471b8;border-radius:8px;background:#f4f9fc;color:#35617e;font-size:11px}
+.pareto-ranking{border:1px solid #e1eaf0;border-radius:12px;padding:14px 14px 10px;background:#fff}.pareto-ranking h4{margin:0;color:#142f4b;font-size:13px}
+.ranking-subtitle{display:block;color:#58728a;font-size:11px;margin:3px 0 10px}
+.pareto-rank-row{display:grid;grid-template-columns:25px 1fr auto;gap:7px;align-items:center;padding:7px 0;border-bottom:1px solid #edf2f5}
+.pareto-rank-num{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:900;color:#fff;background:#a8b3bb}
+.pareto-rank-row.priority .pareto-rank-num{background:#e24a42}.pareto-rank-name{font-size:10px;font-weight:800;color:#193b59;line-height:1.2}.pareto-rank-kg{display:block;font-size:10px;color:#58728a;margin-top:2px}.pareto-rank-pct{font-size:10px;font-weight:800;color:#58728a}.pareto-rank-row.attack-end .pareto-rank-pct{color:#e24a42}
+.pareto-key{margin-top:12px;padding-top:10px;border-top:1px solid #e8eef2;display:grid;gap:8px}.pareto-key div{display:flex;gap:8px;align-items:flex-start}.pareto-key i{width:12px;height:12px;border-radius:3px;margin-top:2px;flex:0 0 auto}.key-priority{background:#17638f}.key-rest{background:#b9c0c5}.pareto-key b{display:block;font-size:10px;color:#26445e}.pareto-key small{font-size:9px;color:#71879a}
+@media(max-width:1000px){.pareto-summary{grid-template-columns:1fr 1fr}.pareto-stat:nth-child(3),.pareto-stat:nth-child(4){border-top:1px solid #e1eaf0}.pareto-layout{grid-template-columns:1fr}.pareto-ranking{order:2}}
+
 </style>
 
 <style>
@@ -149,7 +173,22 @@
 </section>
 <div class="summary">Los KPI y gráficos se recalculan con la selección. Fecha, mes, semana, cliente y tela aplican a ambos libros; área y causa refinan el análisis de rechazos.</div>
 <section class="grid2"><div class="chartcard"><div class="charthead"><div><h3>Tendencia mensual — % rechazo</h3><span>Gerencia: evolución del desempeño frente a la meta del 5%</span></div><div><span class="badge">META ≤ 5%</span><span id="trendStatus" class="trend-status neutral">SIN DATOS</span></div></div><div class="canvasbox"><canvas id="trend"></canvas></div></div><div class="chartcard"><div class="charthead"><div><h3>Rechazo por área</h3><span>Concentración del impacto en kg</span></div><span class="badge">KG</span></div><div class="canvasbox"><canvas id="area"></canvas></div></div></section>
-<section class="grid2"><div class="chartcard"><div class="charthead"><div><h3>Pareto — principales causas</h3><span>Prioridad de ataque por kg rechazados</span></div><span class="badge">80/20</span></div><div class="canvasbox tall"><canvas id="pareto"></canvas></div></div><div class="chartcard"><div class="charthead"><div><h3>Top 10 causas</h3><span>Ranking ejecutivo</span></div></div><div class="tablewrap" id="causeTable"></div></div></section>
+<section class="grid2"><div class="chartcard pareto-executive">
+<div class="charthead"><div><h3>Pareto — principales causas de rechazo</h3><span>Prioridad de ataque por kg rechazados</span></div><span class="badge">80/20</span></div>
+<div class="pareto-summary">
+<div class="pareto-focus"><div class="focus-icon">◎</div><div><small>PRIORIDAD DE ATAQUE</small><strong id="paretoFocusValue">—</strong><span id="paretoFocusText">causas concentran — del rechazo total</span></div></div>
+<div class="pareto-stat"><small>KG RECHAZADOS TOTALES</small><strong id="paretoTotalKg">—</strong></div>
+<div class="pareto-stat"><small>CAUSAS ANALIZADAS</small><strong id="paretoCauseCount">—</strong></div>
+<div class="pareto-stat attack"><small>PUNTO DE ATAQUE</small><strong id="paretoAttackPoint">—</strong><span id="paretoAttackAccum">— acumulado</span></div>
+</div>
+<div class="pareto-layout"><div class="pareto-chart-wrap">
+<div class="pareto-legend"><span><i class="legend-bar"></i> Kg rechazados</span><span><i class="legend-line"></i> % acumulado</span></div>
+<div class="canvasbox tall"><canvas id="pareto"></canvas></div>
+<div id="paretoAttackNote" class="pareto-attack-note">Enfocar acciones en las primeras causas generará el mayor impacto en la reducción del rechazo.</div>
+</div>
+<aside class="pareto-ranking"><h4>CAUSAS DE RECHAZO</h4><span class="ranking-subtitle">Ordenadas por impacto</span><div id="paretoRankingList"></div>
+<div class="pareto-key"><div><i class="key-priority"></i><span><b>Zona de ataque</b><small>Causas hasta alcanzar 80%</small></span></div><div><i class="key-rest"></i><span><b>Resto de causas</b><small>Impacto secundario</small></span></div></div></aside></div></div>
+<div class="chartcard"><div class="charthead"><div><h3>Top 10 causas</h3><span>Ranking ejecutivo</span></div></div><div class="tablewrap" id="causeTable"></div></div></section>
 <section class="grid3"><div class="chartcard"><div class="charthead"><div><h3>Rechazo por cliente — Top 8</h3><span>Impacto acumulado</span></div></div><div class="canvasbox"><canvas id="client"></canvas></div></div><div class="chartcard"><div class="charthead"><div><h3>Tendencia semanal — % rechazo</h3><span>Señal de corto plazo frente a la meta del 5%</span></div><div><span class="badge">META ≤ 5%</span><span id="weekTrendStatus" class="trend-status weekly neutral">SIN DATOS</span></div></div><div class="canvasbox"><canvas id="weekTrend"></canvas></div></div><div class="chartcard"><div class="charthead"><div><h3>Top 10 batches rechazados</h3><span>Magnitud por lote</span></div></div><div class="tablewrap" id="batchTable"></div></div></section>
 <div class="insight" id="insight">Lectura ejecutiva: esperando datos…</div>
 </div>
@@ -344,7 +383,20 @@ function renderCharts(lf,rf){
    {label:'Meta 5%',data:target,borderColor:'#7d8d9b',borderDash:[6,5],borderWidth:2,pointRadius:0,fill:false,tension:0}
  ]},{scales:{y:{beginAtZero:true,suggestedMax:Math.max(10,Math.ceil((Math.max(...validValues,5)||10)/2)*2),ticks:{callback:v=>v+'%'},grid:{color:'#e8eef2'}},x:{grid:{display:false},ticks:{maxRotation:monthlyMode?0:45,minRotation:monthlyMode?0:0,autoSkip:!monthlyMode,font:{size:9}}}},plugins:{legend:{display:false},tooltip:{callbacks:{title:ctx=>monthlyMode?ctx[0].label:ctx[0].label,label:ctx=>ctx.dataset.label==='Meta 5%'?'Meta: 5%':(Number.isFinite(ctx.raw)?ctx.raw.toFixed(2)+'% rechazo':'Sin datos')}}}});
  const ar=aggregate(rf,'AREA RESPONSABLE').slice(0,8);chart('area','bar',{labels:ar.map(x=>x[0]),datasets:[{data:ar.map(x=>+x[1].toFixed(1)),backgroundColor:'#3f8e8d',borderRadius:5}]},{indexAxis:'y',scales:{x:{grid:{color:'#edf2f5'}},y:{grid:{display:false}}}});
- const cs=aggregate(rf,'CAUSA').slice(0,10),total=cs.reduce((s,x)=>s+x[1],0),cum=[];let run=0;cs.forEach(x=>{run+=x[1];cum.push(total?run/total*100:0)});chart('pareto','bar',{labels:cs.map(x=>x[0]),datasets:[{type:'bar',data:cs.map(x=>+x[1].toFixed(1)),backgroundColor:'#2e6e92',borderRadius:4},{type:'line',data:cum,borderColor:'#d99132',pointBackgroundColor:'#d99132',yAxisID:'y1',tension:.25,pointRadius:3}]},{plugins:{legend:{display:false}},scales:{x:{ticks:{maxRotation:55,minRotation:35,font:{size:8}},grid:{display:false}},y:{beginAtZero:true,grid:{color:'#edf2f5'},ticks:{font:{size:9}}},y1:{position:'right',beginAtZero:true,max:100,grid:{display:false},ticks:{callback:v=>v+'%',font:{size:8}}}}});
+ const cs=aggregate(rf,'CAUSA').slice(0,10),total=cs.reduce((s,x)=>s+x[1],0);
+ let run=0; const rows=cs.map(([cause,kg],i)=>{run+=kg;return {cause,kg,pct:total?run/total*100:0,index:i}});
+ const cross=rows.findIndex(r=>r.pct>=80), attackCount=cross>=0?cross+1:rows.length, attackAccum=cross>=0?rows[cross].pct:(rows.length?rows[rows.length-1].pct:0);
+ $('paretoFocusValue').textContent=attackCount;
+ $('paretoFocusText').textContent=`causas concentran ${attackAccum.toFixed(1)}% del rechazo total`;
+ $('paretoTotalKg').textContent=total.toLocaleString('en-US',{maximumFractionDigits:1})+' kg';
+ $('paretoCauseCount').textContent=rows.length;
+ $('paretoAttackPoint').textContent=cross>=0?`Causa #${attackCount}`:'—';
+ $('paretoAttackAccum').textContent=cross>=0?`${attackAccum.toFixed(1)}% acumulado`:'Sin datos';
+ $('paretoRankingList').innerHTML=rows.map((r,i)=>`<div class="pareto-rank-row ${i<attackCount?'priority':''} ${i===attackCount-1?'attack-end':''}"><span class="pareto-rank-num">${i+1}</span><span><span class="pareto-rank-name">${escapeHtml(r.cause)}</span><span class="pareto-rank-kg">${r.kg.toLocaleString('en-US',{maximumFractionDigits:1})} kg</span></span><span class="pareto-rank-pct">${r.pct.toFixed(1)}%</span></div>`).join('');
+ chart('pareto','bar',{labels:rows.map(r=>r.cause),datasets:[
+ {type:'bar',data:rows.map(r=>+r.kg.toFixed(1)),backgroundColor:rows.map((r,i)=>i<attackCount?'#17638f':'#b9c0c5'),borderRadius:4},
+ {type:'line',data:rows.map(r=>r.pct),borderColor:'#e68a22',pointBackgroundColor:rows.map((r,i)=>i===attackCount-1?'#e24a42':'#e68a22'),pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:rows.map((r,i)=>i===attackCount-1?7:3),yAxisID:'y1',tension:.25}
+ ]},{plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.type==='line'?ctx.raw.toFixed(1)+'% acumulado':ctx.raw.toLocaleString('en-US',{maximumFractionDigits:1})+' kg'}}},scales:{x:{ticks:{maxRotation:38,minRotation:38,font:{size:8}},grid:{display:false}},y:{beginAtZero:true,grid:{color:'#edf2f5'},ticks:{callback:v=>Number(v).toLocaleString('en-US')+' kg',font:{size:9}}},y1:{position:'right',beginAtZero:true,max:100,grid:{display:false},ticks:{callback:v=>v+'%',font:{size:8}}}}});
  const cl=aggregate(rf,'CLIENTE').slice(0,8);chart('client','bar',{labels:cl.map(x=>x[0]),datasets:[{data:cl.map(x=>+x[1].toFixed(1)),backgroundColor:'#438f8e',borderRadius:5}]},{indexAxis:'y',scales:{x:{grid:{color:'#edf2f5'}},y:{grid:{display:false},ticks:{font:{size:8}}}}});
  const weekMap={};rf.forEach(r=>{const w=String(r.SEMANA??'').trim();if(!w)return;if(!weekMap[w])weekMap[w]={k:0,v:0};weekMap[w].k+=num(r.KILOS_RECHAZO_DASHBOARD)});lf.forEach(r=>{const w=String(r.SEMANA??'').trim();if(!w)return;if(!weekMap[w])weekMap[w]={k:0,v:0};weekMap[w].v+=num(r.LIBERADO_KG_DASHBOARD)});const ws=Object.keys(weekMap).sort(sortWeeks);const weekValues=ws.map(w=>weekMap[w].v?+(weekMap[w].k/weekMap[w].v*100).toFixed(2):null);const latestWeek=weekValues.length?weekValues[weekValues.length-1]:NaN;const [wsc,wst]=trendStatus(latestWeek);const wse=$('weekTrendStatus');wse.className='trend-status weekly '+wsc;wse.textContent=wst;const weekLabels=ws.map(x=>{const m=String(x).match(/(\d+)(?:\D*)$/);return m?'Sem '+String(parseInt(m[1],10)).padStart(2,'0'):x});const weekPointColors=weekValues.map(v=>Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#9aaab6');chart('weekTrend','line',{labels:weekLabels,datasets:[{label:'% rechazo',data:weekValues,borderColor:'#6f8798',backgroundColor:'rgba(63,142,141,.08)',pointRadius:4,pointHoverRadius:7,pointBackgroundColor:weekPointColors,pointBorderColor:'#fff',pointBorderWidth:2,borderWidth:3,tension:.22,fill:true,segment:{borderColor:ctx=>{const v=ctx.p1?.parsed?.y;return Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#6f8798';}}},{label:'Meta 5%',data:ws.map(()=>5),borderColor:'#7d8d9b',borderDash:[6,5],borderWidth:2,pointRadius:0,fill:false,tension:0}]},{scales:{y:{beginAtZero:true,suggestedMax:Math.max(10,Math.ceil((Math.max(...weekValues.filter(Number.isFinite),5)||10)/5)*5),ticks:{callback:v=>v+'%'},grid:{color:'#e8eef2'}},x:{grid:{display:false},ticks:{maxRotation:45,minRotation:0,autoSkip:true,font:{size:9}}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.label==='Meta 5%'?'Meta: 5%':(Number.isFinite(ctx.raw)?ctx.raw.toFixed(2)+'% rechazo':'Sin datos')}}}});
  $('causeTable').innerHTML=cs.map((x,i)=>`<div class="rank"><b>${i+1}</b><span title="${esc(x[0])}">${esc(x[0])}</span><span class="kg">${fmt(x[1],1)} kg</span><span>${total?pct(x[1]/total):'0.00%'}</span></div>`).join('')||'<div class="sub">Sin datos</div>';
