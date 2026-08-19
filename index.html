@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V37 LEYENDA LINEA DE TENDENCIA -->
 <!-- VERSION: V36 AREA VERDE ROJA SEGUN META -->
 <!-- VERSION: V35 CURVA SIN ETIQUETAS -->
 <!-- VERSION: V34 SIN ETIQUETA CURVA -->
@@ -2246,6 +2247,15 @@ function renderCharts(lf,rf){
         font:{size:8,weight:'600'},
         generateLabels:chart=>{
           const base=Chart.defaults.plugins.legend.labels.generateLabels(chart);
+          const trendItem=base.find(x=>x.text==='Tendencia');
+          if(trendItem){
+            trendItem.text='Línea de tendencia';
+            trendItem.fillStyle='transparent';
+            trendItem.strokeStyle='#7b8794';
+            trendItem.lineWidth=1.5;
+            trendItem.lineDash=[5,5];
+            trendItem.pointStyle='line';
+          }
           return base.concat([
             {text:'≤ 5% Cumple',fillStyle:'rgba(40,174,92,.35)',strokeStyle:'rgba(40,174,92,.55)',lineWidth:1},
             {text:'> 5% Fuera de meta',fillStyle:'rgba(222,68,68,.35)',strokeStyle:'rgba(222,68,68,.55)',lineWidth:1}
