@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V23 LAYOUT DOS GRAFICAS CORREGIDO -->
 <!-- VERSION: V22 CORRECCION CARGA + RANKING CLIENTE -->
 <!-- VERSION: V21 TOP 10 BATCHES AL FINAL -->
 <!-- VERSION: V20 ETIQUETAS DATOS TENDENCIA SEMANAL -->
@@ -1258,7 +1259,20 @@
     <div class="client-summary-value" id="clientSummaryValue">—</div>
   </div>
 </div>
-<div class="canvasbox"></div></div><div class="chartcard"><div class="charthead"><div><h3>Tendencia semanal — % rechazo</h3><span>Señal de corto plazo frente a la meta del 5%</span></div><div><span class="badge">META ≤ 5%</span><span id="weekTrendStatus" class="trend-status weekly neutral">SIN DATOS</span></div></div><div class="canvasbox"><canvas id="weekTrend"></canvas></div></div></section>
+<div class="chartcard">
+  <div class="charthead">
+    <div>
+      <h3>Tendencia semanal — % rechazo</h3>
+      <span>Señal de corto plazo frente a la meta del 5%</span>
+    </div>
+    <div>
+      <span class="badge">META ≤ 5%</span>
+      <span id="weekTrendStatus" class="trend-status weekly neutral">SIN DATOS</span>
+    </div>
+  </div>
+  <div class="canvasbox"><canvas id="weekTrend"></canvas></div>
+</div>
+</section>
 
 <div class="insight" id="insight">Lectura ejecutiva: esperando datos…</div>
 
@@ -1523,6 +1537,7 @@ function renderClientRanking(rows){
   $('clientSummaryValue').textContent=firstPct.toFixed(1)+'%';
 }
 function renderCharts(lf,rf){
+ renderClientRanking(rf);
  const monthlyMode=state.months.size===0;
  let trendLabels=[],trendValues=[];
  if(monthlyMode){
@@ -1540,7 +1555,6 @@ function renderCharts(lf,rf){
    $('trend').closest('.chartcard').querySelector('h3').textContent='Tendencia mensual — % rechazo';
    $('trend').closest('.chartcard').querySelector('.charthead span').textContent='Gerencia: evolución del desempeño frente a la meta del 5%';
  }else{
-   renderClientRanking(rf);
  const weekMap={};
    rf.forEach(r=>{
      const w=String(r.SEMANA??'').trim(); if(!w)return;
