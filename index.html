@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V22 CORRECCION CARGA + RANKING CLIENTE -->
 <!-- VERSION: V21 TOP 10 BATCHES AL FINAL -->
 <!-- VERSION: V20 ETIQUETAS DATOS TENDENCIA SEMANAL -->
 <!-- VERSION: V19 CLIENTE RANKING EJECUTIVO -->
@@ -1494,6 +1495,33 @@ const executiveDataLabels={
   }
 };
 
+function renderClientRanking(rows){
+  const el=$('clientRanking');
+  if(!el) return;
+  const data=aggregate(rows,'CLIENTE').slice(0,8);
+  const total=data.reduce((s,x)=>s+x[1],0);
+  if(!data.length){
+    el.innerHTML='<div style="padding:25px;text-align:center;color:#718595;font-size:11px">Sin datos para la selección</div>';
+    return;
+  }
+  const max=data[0][1]||1;
+  el.innerHTML=data.map((d,i)=>{
+    const pct=total?d[1]/total*100:0;
+    const width=Math.max(2,d[1]/max*100);
+    return `<div class="client-rank-row">
+      <div class="client-rank-num">${i+1}</div>
+      <div class="client-rank-name" title="${escapeHtml(d[0])}">${escapeHtml(d[0])}</div>
+      <div class="client-rank-bar"><div class="client-rank-fill" style="width:${width}%"></div></div>
+      <div class="client-rank-kg">${fmt(d[1],1)} kg</div>
+      <div class="client-rank-pct">${pct.toFixed(1)}%</div>
+    </div>`;
+  }).join('');
+  const first=data[0];
+  const firstPct=total?first[1]/total*100:0;
+  $('clientSummaryTitle').textContent=first[0];
+  $('clientSummaryText').textContent='Mayor concentración del rechazo';
+  $('clientSummaryValue').textContent=firstPct.toFixed(1)+'%';
+}
 function renderCharts(lf,rf){
  const monthlyMode=state.months.size===0;
  let trendLabels=[],trendValues=[];
@@ -1512,7 +1540,8 @@ function renderCharts(lf,rf){
    $('trend').closest('.chartcard').querySelector('h3').textContent='Tendencia mensual — % rechazo';
    $('trend').closest('.chartcard').querySelector('.charthead span').textContent='Gerencia: evolución del desempeño frente a la meta del 5%';
  }else{
-   const weekMap={};
+   renderClientRanking(rf);
+ const weekMap={};
    rf.forEach(r=>{
      const w=String(r.SEMANA??'').trim(); if(!w)return;
      if(!weekMap[w])weekMap[w]={k:0,v:0};
@@ -1633,33 +1662,6 @@ window.paretoDonutChart=new Chart(donutCtx,{type:'doughnut',data:{labels:['Prior
 $('paretoRankingList').innerHTML=rows.map((r,i)=>`<div class="pareto-rank-row ${i<attackCount?'priority':''} ${i===attackCount-1?'attack-end':''}"><span class="pareto-rank-num">${i+1}</span><span><span class="pareto-rank-name">${escapeHtml(r.cause)}</span><span class="pareto-rank-kg">${r.kg.toLocaleString('en-US',{maximumFractionDigits:1})} kg</span></span><span class="pareto-rank-pct">${(r.kg/total*100).toFixed(2)}%</span></div>`).join('');
 chart('pareto','bar',{labels:rows.map(r=>r.cause),datasets:[{type:'bar',data:rows.map(r=>+r.kg.toFixed(1)),backgroundColor:rows.map((r,i)=>i<attackCount?'#2d7398':'#c4ccd1'),borderRadius:5,barPercentage:.72,categoryPercentage:.78},{type:'line',data:rows.map(r=>r.pct),borderColor:'#e68a22',pointBackgroundColor:rows.map((r,i)=>i===attackCount-1?'#df4a45':'#e68a22'),pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:rows.map((r,i)=>i===attackCount-1?7:2),yAxisID:'y1',tension:.25}]},{plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.type==='line'?ctx.raw.toFixed(1)+'% acumulado':ctx.raw.toLocaleString('en-US',{maximumFractionDigits:1})+' kg'}}},scales:{x:{ticks:{maxRotation:38,minRotation:38,font:{size:8}},grid:{display:false}},y:{beginAtZero:true,grid:{color:'#edf2f5'},ticks:{callback:v=>Number(v).toLocaleString('en-US')+' kg',font:{size:9}}},y1:{position:'right',beginAtZero:true,max:100,grid:{display:false},ticks:{callback:v=>v+'%',font:{size:8}}}}});
  const cl=aggregate(rf,'CLIENTE').slice(0,8);
-renderClientRanking(rows){
-  const el=$('clientRanking');
-  if(!el) return;
-  const data=aggregate(rows,'CLIENTE').slice(0,8);
-  const total=data.reduce((s,x)=>s+x[1],0);
-  if(!data.length){
-    el.innerHTML='<div style="padding:25px;text-align:center;color:#718595;font-size:11px">Sin datos para la selección</div>';
-    return;
-  }
-  const max=data[0][1]||1;
-  el.innerHTML=data.map((d,i)=>{
-    const pct=total?d[1]/total*100:0;
-    const width=Math.max(2,d[1]/max*100);
-    return `<div class="client-rank-row">
-      <div class="client-rank-num">${i+1}</div>
-      <div class="client-rank-name" title="${escapeHtml(d[0])}">${escapeHtml(d[0])}</div>
-      <div class="client-rank-bar"><div class="client-rank-fill" style="width:${width}%"></div></div>
-      <div class="client-rank-kg">${fmt(d[1],1)} kg</div>
-      <div class="client-rank-pct">${pct.toFixed(1)}%</div>
-    </div>`;
-  }).join('');
-  const first=data[0];
-  const firstPct=total?first[1]/total*100:0;
-  $('clientSummaryTitle').textContent=first[0];
-  $('clientSummaryText').textContent='Mayor concentración del rechazo';
-  $('clientSummaryValue').textContent=firstPct.toFixed(1)+'%';
-}
 
 const weekMap={};rf.forEach(r=>{const w=String(r.SEMANA??'').trim();if(!w)return;if(!weekMap[w])weekMap[w]={k:0,v:0};weekMap[w].k+=num(r.KILOS_RECHAZO_DASHBOARD)});lf.forEach(r=>{const w=String(r.SEMANA??'').trim();if(!w)return;if(!weekMap[w])weekMap[w]={k:0,v:0};weekMap[w].v+=num(r.LIBERADO_KG_DASHBOARD)});const ws=Object.keys(weekMap).sort(sortWeeks);const weekValues=ws.map(w=>weekMap[w].v?+(weekMap[w].k/weekMap[w].v*100).toFixed(2):null);const latestWeek=weekValues.length?weekValues[weekValues.length-1]:NaN;const [wsc,wst]=trendStatus(latestWeek);const wse=$('weekTrendStatus');wse.className='trend-status weekly '+wsc;wse.textContent=wst;const weekLabels=ws.map(x=>{const m=String(x).match(/(\d+)(?:\D*)$/);return m?'Sem '+String(parseInt(m[1],10)).padStart(2,'0'):x});const weekPointColors=weekValues.map(v=>Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#9aaab6');chart('weekTrend','line',{labels:weekLabels,datasets:[{label:'% rechazo',data:weekValues,borderColor:'#6f8798',backgroundColor:'rgba(63,142,141,.08)',pointRadius:4,pointHoverRadius:7,pointBackgroundColor:weekPointColors,pointBorderColor:'#fff',pointBorderWidth:2,borderWidth:3,tension:.22,fill:true,segment:{borderColor:ctx=>{const v=ctx.p1?.parsed?.y;return Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#6f8798';}}},{label:'Meta 5%',data:ws.map(()=>5),borderColor:'#7d8d9b',borderDash:[6,5],borderWidth:2,pointRadius:0,fill:false,tension:0}]},{scales:{y:{beginAtZero:true,suggestedMax:Math.max(10,Math.ceil((Math.max(...weekValues.filter(Number.isFinite),5)||10)/5)*5),ticks:{callback:v=>v+'%'},grid:{color:'#e8eef2'}},x:{grid:{display:false},ticks:{maxRotation:45,minRotation:0,autoSkip:true,font:{size:9}}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.label==='Meta 5%'?'Meta: 5%':(Number.isFinite(ctx.raw)?ctx.raw.toFixed(2)+'% rechazo':'Sin datos')}}}});
 const bt=aggregate(rf,'BATCH').sort((a,b)=>b[1]-a[1]).slice(0,10);
@@ -1679,53 +1681,38 @@ const batchRows=bt.map((x,i)=>{
 }
 function apply(){const [lf,rf]=filters();renderKpis(lf,rf);renderCharts(lf,rf);$('summary').textContent=`${fmt(lf.length)} registros liberación · ${fmt(rf.length)} registros rechazo · KPI según selección`}
 function populate(){const dates=LIB.map(r=>iso(r.FECHA)).filter(Boolean);$('from').value=Math.min(...dates.map(Number).map(n=>n))?dates.sort()[0]:'';$('to').value=dates.sort().slice(-1)[0]||'';setupFilter(document.querySelector('[data-key="months"]'),'months',LIB.map(r=>r.MES),'Todos los meses',monthLabel);setupFilter(document.querySelector('[data-key="weeks"]'),'weeks',unique([...LIB.map(r=>r.SEMANA),...REJ.map(r=>r.SEMANA)]),'Todas las semanas');setupFilter(document.querySelector('[data-key="clients"]'),'clients',unique([...LIB.map(r=>r.CLIENTE),...REJ.map(r=>r.CLIENTE)]),'Todos');setupFilter(document.querySelector('[data-key="areas"]'),'areas',REJ.map(r=>r['AREA RESPONSABLE']),'Todas');setupFilter(document.querySelector('[data-key="causes"]'),'causes',REJ.map(r=>r.CAUSA),'Todas');setupFilter(document.querySelector('[data-key="telas"]'),'telas',unique([...LIB.map(r=>r.TELA),...REJ.map(r=>r.TELA)]),'Todas');document.querySelectorAll('input[type=date]').forEach(i=>i.onchange=apply);$('reset').onclick=()=>{document.querySelectorAll('.options input').forEach(i=>i.checked=false);Object.keys(state).forEach(k=>state[k].clear());document.querySelectorAll('.multi').forEach(el=>{el.querySelector('.selcount').textContent='Sin selección'});$('from').value=dates.sort()[0];$('to').value=dates.sort().slice(-1)[0];apply()};document.addEventListener('click',e=>{if(!e.target.closest('.multi'))document.querySelectorAll('.multi.open').forEach(x=>{x.classList.remove('open');x.querySelector('.selectbtn').classList.remove('open')})});apply()}
-async function load(){try{const res=await fetch(DATA_URL+'?v='+Date.now());if(!res.ok)throw new Error('No se pudo cargar '+DATA_URL+' ('+res.status+')');const ab=await res.arrayBuffer();const wb=XLSX.read(ab,{type:'array',cellDates:true});const lr=XLSX.utils.sheet_to_json(wb.Sheets['LIBERADOS'],{defval:null});const rr=XLSX.utils.sheet_to_json(wb.Sheets['RECHAZOS'],{defval:null});LIB=lr;REJ=rr;populate();$('loading').style.display='none'}catch(e){console.error(e);$('loading').style.display='none';$('error').style.display='block';$('error').textContent=(String(e.message||'').match(/(404|Failed to fetch|NetworkError|No se pudo cargar)/i)?'No fue posible cargar el archivo maestro. Verifica que DATA_DASHBOARD_CALIDAD_2026.xlsx esté en la raíz del repositorio y que el nombre sea exactamente igual. ':'Error interno del dashboard: ')+(e.message||e)} }
+async function load(){
+  const hideLoading=()=>{const el=$('loading');if(el)el.style.display='none'};
+  const showError=(msg)=>{hideLoading();const el=$('error');if(el){el.style.display='block';el.textContent=msg}};
+  try{
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),15000);
+    let res;
+    try{
+      res=await fetch(DATA_URL+'?v='+Date.now(),{signal:controller.signal});
+    }finally{
+      clearTimeout(timer);
+    }
+    if(!res.ok)throw new Error('No se pudo cargar '+DATA_URL+' ('+res.status+')');
+    const ab=await res.arrayBuffer();
+    const wb=XLSX.read(ab,{type:'array',cellDates:true});
+    if(!wb.Sheets['LIBERADOS'] || !wb.Sheets['RECHAZOS'])
+      throw new Error('El archivo maestro no contiene las hojas LIBERADOS y RECHAZOS.');
+    const lr=XLSX.utils.sheet_to_json(wb.Sheets['LIBERADOS'],{defval:null});
+    const rr=XLSX.utils.sheet_to_json(wb.Sheets['RECHAZOS'],{defval:null});
+    LIB=lr;REJ=rr;populate();hideLoading();
+  }catch(e){
+    console.error(e);
+    const msg=e&&e.name==='AbortError'
+      ?'El archivo maestro tardó demasiado en responder. Verifica que DATA_DASHBOARD_CALIDAD_2026.xlsx esté en la raíz del repositorio.'
+      :((String(e.message||'').match(/(404|Failed to fetch|NetworkError|No se pudo cargar)/i))
+        ?'No fue posible cargar el archivo maestro. Verifica que DATA_DASHBOARD_CALIDAD_2026.xlsx esté en la raíz del repositorio y que el nombre sea exactamente igual.'
+        :'Error interno del dashboard: '+(e.message||e));
+    showError(msg);
+  }
+}
 load();
 </script>
-<script>
-(function(){
-  function positionMonthlyTarget(){
-    const line = document.querySelector('.monthly-target-line');
-    const label = document.querySelector('.monthly-target-label');
-    if(!line || !label) return;
 
-    const canvas = line.previousElementSibling;
-    if(!canvas) return;
-
-    const chart = window.monthlyChart || window.trendMonthlyChart || window.monthlyTrendChart;
-    const rect = canvas.getBoundingClientRect();
-
-    // If the chart instance is available, use its y scale so the line is
-    // exactly at 5%, independent of chart height or max value.
-    if(chart && chart.scales){
-      const y = chart.scales.y || chart.scales['y-axis-0'];
-      if(y && typeof y.getPixelForValue === 'function'){
-        const pixel = y.getPixelForValue(5);
-        const canvasRect = canvas.getBoundingClientRect();
-        const parentRect = line.parentElement.getBoundingClientRect();
-        line.style.top = (pixel - canvasRect.top) + 'px';
-        label.style.top = (pixel - canvasRect.top) + 'px';
-        return;
-      }
-    }
-
-    // Fallback for the current dashboard: 0–10% scale.
-    const plotTop = 0;
-    const plotHeight = rect.height;
-    const y = plotTop + plotHeight * 0.5;
-    line.style.top = y + 'px';
-    label.style.top = y + 'px';
-  }
-
-  window.addEventListener('resize', positionMonthlyTarget);
-  document.addEventListener('DOMContentLoaded', function(){
-    setTimeout(positionMonthlyTarget, 100);
-    setTimeout(positionMonthlyTarget, 500);
-  });
-
-  // Expose a harmless helper so existing redraw logic can call it if needed.
-  window.updateMonthlyTargetLine = positionMonthlyTarget;
-})();
-</script>
 
 </body></html>
