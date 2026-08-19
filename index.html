@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V32 CURVA DE TENDENCIA -->
 <!-- VERSION: V31 MESES EN TEXTO -->
 <!-- VERSION: V30 FIX NULL INNERHTML -->
 <!-- VERSION: V29 TITULO 36PX -->
@@ -2085,9 +2086,30 @@ function renderCharts(lf,rf){
  statusEl.className='trend-status '+statusClass;
  statusEl.textContent=statusText;
  const target=trendLabels.map(()=>5);
+
+ // Curva de tendencia lineal: muestra la dirección general del indicador
+ // sin alterar los valores reales de cada mes/semana.
+ const trendCurve=trendValues.map((_,i)=>null);
+ const trendPoints=trendValues
+   .map((v,i)=>Number.isFinite(v)?[i,Number(v)]:null)
+   .filter(Boolean);
+ if(trendPoints.length>=2){
+   const n=trendPoints.length;
+   const sx=trendPoints.reduce((s,p)=>s+p[0],0);
+   const sy=trendPoints.reduce((s,p)=>s+p[1],0);
+   const sxy=trendPoints.reduce((s,p)=>s+p[0]*p[1],0);
+   const sx2=trendPoints.reduce((s,p)=>s+p[0]*p[0],0);
+   const den=n*sx2-sx*sx;
+   const slope=den?((n*sxy-sx*sy)/den):0;
+   const intercept=(sy-slope*sx)/n;
+   trendPoints.forEach(([x])=>{trendCurve[x]=slope*x+intercept;});
+ }
+
  chart('trend','line',{
   labels:trendLabels,
-  datasets:[{
+  datasets:[
+   {
+    label:'% rechazo',
     data:trendValues,
     borderColor:'#357ca5',
     backgroundColor:'rgba(53,124,165,.12)',
@@ -2102,16 +2124,44 @@ function renderCharts(lf,rf){
     },
     pointBorderColor:'#fff',
     tension:.25
-  }]
-},{maintainAspectRatio:false,
+   },
+   {
+    label:'Curva de tendencia',
+    data:trendCurve,
+    borderColor:'#6f4bb2',
+    backgroundColor:'transparent',
+    borderWidth:2.5,
+    borderDash:[7,5],
+    pointRadius:0,
+    pointHoverRadius:0,
+    fill:false,
+    tension:.15
+   }
+  ]
+ },{maintainAspectRatio:false,
   plugins:{
-    legend:{display:false},
-    tooltip:{callbacks:{label:ctx=>Number(ctx.raw).toFixed(2)+'%'}}},
+    legend:{
+      display:true,
+      position:'top',
+      align:'start',
+      labels:{boxWidth:18,boxHeight:2,padding:14,font:{size:9,weight:'700'}}
+    },
+    tooltip:{
+      callbacks:{
+        label:ctx=>{
+          if(ctx.dataset.label==='Curva de tendencia'){
+            return 'Tendencia: '+Number(ctx.raw).toFixed(2)+'%';
+          }
+          return Number(ctx.raw).toFixed(2)+'%';
+        }
+      }
+    }
+  },
   scales:{
     x:{grid:{display:false},ticks:{font:{size:9}}},
     y:{beginAtZero:true,grid:{color:'#e8eef2'},ticks:{callback:v=>v+'%',font:{size:9}}}
   }
-});
+ });
 
 (function(){
   const _labels=trendLabels, _values=trendValues;
