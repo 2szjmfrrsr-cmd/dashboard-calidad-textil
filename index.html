@@ -5,6 +5,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V39 LEYENDA CENTRADA Y BLOQUES DE AREA -->
+<!-- VERSION: V38 LEYENDA VISIBLE TENDENCIA -->
 <!-- VERSION: V37 LEYENDA LINEA DE TENDENCIA -->
 <!-- VERSION: V36 AREA VERDE ROJA SEGUN META -->
 <!-- VERSION: V35 CURVA SIN ETIQUETAS -->
@@ -1693,7 +1695,52 @@
   display:block;
 }
 </style>
-</head>
+<style>
+.trend-canvasbox{position:relative}
+.trendline-legend{
+  position:absolute;
+  top:7px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:5px 10px;
+  border:1px solid #e2e8ed;
+  border-radius:999px;
+  background:rgba(255,255,255,.94);
+  color:#5f6d79;
+  font-size:9.5px;
+  font-weight:650;
+  letter-spacing:.05px;
+  white-space:nowrap;
+  pointer-events:none;
+  z-index:4;
+}
+.trendline-swatch{
+  width:22px;
+  height:0;
+  border-top:2px dashed #7b8794;
+  display:inline-block;
+}
+.area-legend{
+  width:15px;
+  height:11px;
+  border-radius:3px;
+  display:inline-block;
+  margin-left:3px;
+  border:1px solid transparent;
+}
+.area-legend.green{
+  background:rgba(40,174,92,.28);
+  border-color:rgba(40,174,92,.42);
+}
+.area-legend.red{
+  background:rgba(222,68,68,.28);
+  border-color:rgba(222,68,68,.42);
+}
+</style></head>
 <body>
 <div class="loading" id="loading">Cargando datos del archivo maestro…</div>
 <div class="wrap">
@@ -1725,10 +1772,19 @@
 <div class="kpi"><div class="label">Batches procesados</div><div class="value" id="kBat">—</div><div class="semrow"><div class="lamp green"></div><div class="semtext"><b>ACTIVIDAD</b><span>Informativo</span></div></div><div class="sub">Batches únicos en la selección</div></div>
 </section>
 <div class="summary">Los KPI y gráficos se recalculan con la selección. Fecha, mes, semana, cliente y tela aplican a ambos libros; área y causa refinan el análisis de rechazos.</div>
-<section class="grid2"><div class="chartcard"><div class="charthead"><div><h3>Tendencia mensual — % rechazo</h3><span>Gerencia: evolución del desempeño frente a la meta del 5%</span></div><div><span class="badge">META ≤ 5%</span><span id="trendStatus" class="trend-status neutral">SIN DATOS</span></div></div><div class="canvasbox"><canvas id="trend">
+<section class="grid2"><div class="chartcard"><div class="charthead"><div><h3>Tendencia mensual — % rechazo</h3><span>Gerencia: evolución del desempeño frente a la meta del 5%</span></div><div><span class="badge">META ≤ 5%</span><span id="trendStatus" class="trend-status neutral">SIN DATOS</span></div></div><div class="canvasbox trend-canvasbox"><canvas id="trend">
 <div class="monthly-target-line" data-target="5"></div>
 <div class="monthly-target-label" data-target-label="5">META 5%</div>
-</canvas></div>
+</canvas>
+<div class="trendline-legend" aria-label="Línea de tendencia">
+  <span class="trendline-swatch"></span>
+  <span>Línea de tendencia</span>
+  <span class="area-legend green"></span>
+  <span>≤ 5% Cumple</span>
+  <span class="area-legend red"></span>
+  <span>&gt; 5% Fuera de meta</span>
+</div>
+</div>
 <div class="trend-summary-strip">
   <div class="trend-stat"><small>PROMEDIO DEL PERÍODO</small><strong id="trendAvg">—</strong><span id="trendAvgPeriod">—</span></div>
   <div class="trend-stat"><small>MEJOR DESEMPEÑO</small><strong id="trendBest">—</strong><span id="trendBestPeriod">—</span></div>
@@ -2237,7 +2293,7 @@ function renderCharts(lf,rf){
  },{maintainAspectRatio:false,
   plugins:{
     legend:{
-      display:true,
+      display:false,
       position:'top',
       align:'start',
       labels:{
