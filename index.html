@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V20 ETIQUETAS DATOS TENDENCIA SEMANAL -->
 <!-- VERSION: V19 CLIENTE RANKING EJECUTIVO -->
 <!-- VERSION: V18 LINEA META 5% REAL EN CHART.JS -->
 <!-- VERSION: V17 SOLO 2 GRAFICAS EN FILA -->
@@ -1254,27 +1255,36 @@ const executiveDataLabels={
     const {ctx}=chart;
     chart.data.datasets.forEach((ds,di)=>{
       if(ds.type==='line' && chart.canvas.id==='pareto') return;
+      if(ds.label==='Meta 5%') return;
       const meta=chart.getDatasetMeta(di);
       if(!meta || meta.hidden) return;
       meta.data.forEach((el,i)=>{
         const raw=ds.data?.[i];
-        if(!Number.isFinite(Number(raw)) || chart.canvas.id!=='trend') return;
+        if(!Number.isFinite(Number(raw)) || !['trend','weekTrend'].includes(chart.canvas.id)) return;
         const v=Number(raw);
         const p=el.getProps(['x','y'],true);
         const text=v.toFixed(1)+'%';
         const color=v<=5?'#16944f':(v<=7?'#c78900':'#d43f3f');
+        const weekly=chart.canvas.id==='weekTrend';
         ctx.save();
-        ctx.font='800 10px Arial';
-        const padX=5,padY=3;
-        const w=ctx.measureText(text).width+padX*2,h=17;
+        ctx.font=weekly?'800 8px Arial':'800 10px Arial';
+        const padX=weekly?3:5;
+        const w=ctx.measureText(text).width+padX*2;
+        const h=weekly?14:17;
         const above=(i%2===0);
-        const x=p.x-w/2,y=above?p.y-h-9:p.y+9;
+        let x=p.x-w/2;
+        let y=above?p.y-h-5:p.y+5;
+        /* Keep labels inside the plotting canvas. */
+        const leftLimit=2, rightLimit=chart.width-w-2;
+        const topLimit=2, bottomLimit=chart.height-h-2;
+        x=Math.max(leftLimit,Math.min(x,rightLimit));
+        y=Math.max(topLimit,Math.min(y,bottomLimit));
         ctx.beginPath();
-        ctx.roundRect(x,y,w,h,4);
+        ctx.roundRect(x,y,w,h,3);
         ctx.fillStyle='#ffffff';ctx.fill();
         ctx.strokeStyle=color;ctx.lineWidth=1;ctx.stroke();
         ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';
-        ctx.fillText(text,p.x,y+h/2);
+        ctx.fillText(text,x+w/2,y+h/2);
         ctx.restore();
       });
     });
