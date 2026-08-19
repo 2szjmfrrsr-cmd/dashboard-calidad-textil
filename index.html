@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: PARETO ZONA DE ATAQUE + FIX MS -->
 <!-- VERSION: PARETO EJECUTIVO ZONA DE ATAQUE -->
 <!-- VERSION: TENDENCIA MENSUAL/SEMANAL ADAPTABLE -->
 <!-- VERSION: MES -> SEMANA DEPENDIENTE V1 -->
@@ -379,7 +380,7 @@ function renderCharts(lf,rf){
  statusEl.textContent=statusText;
  const target=trendLabels.map(()=>5);
  chart('trend','line',{labels:trendLabels,datasets:[
-   {label:'% rechazo',data:trendValues,borderColor:'#35769a',backgroundColor:'rgba(53,118,154,.10)',pointRadius:ms.length===1?6:4,pointHoverRadius:7,pointBackgroundColor:trendValues.map(v=>Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#9aaab6'),pointBorderColor:'#ffffff',pointBorderWidth:2,borderWidth:3,tension:.25,fill:true,segment:{borderColor:ctx=>{const v=ctx.p1?.parsed?.y;return v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d';}}},
+   {label:'% rechazo',data:trendValues,borderColor:'#35769a',backgroundColor:'rgba(53,118,154,.10)',pointRadius:trendLabels.length===1?6:4,pointHoverRadius:7,pointBackgroundColor:trendValues.map(v=>Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#9aaab6'),pointBorderColor:'#ffffff',pointBorderWidth:2,borderWidth:3,tension:.25,fill:true,segment:{borderColor:ctx=>{const v=ctx.p1?.parsed?.y;return v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d';}}},
    {label:'Meta 5%',data:target,borderColor:'#7d8d9b',borderDash:[6,5],borderWidth:2,pointRadius:0,fill:false,tension:0}
  ]},{scales:{y:{beginAtZero:true,suggestedMax:Math.max(10,Math.ceil((Math.max(...validValues,5)||10)/2)*2),ticks:{callback:v=>v+'%'},grid:{color:'#e8eef2'}},x:{grid:{display:false},ticks:{maxRotation:monthlyMode?0:45,minRotation:monthlyMode?0:0,autoSkip:!monthlyMode,font:{size:9}}}},plugins:{legend:{display:false},tooltip:{callbacks:{title:ctx=>monthlyMode?ctx[0].label:ctx[0].label,label:ctx=>ctx.dataset.label==='Meta 5%'?'Meta: 5%':(Number.isFinite(ctx.raw)?ctx.raw.toFixed(2)+'% rechazo':'Sin datos')}}}});
  const ar=aggregate(rf,'AREA RESPONSABLE').slice(0,8);chart('area','bar',{labels:ar.map(x=>x[0]),datasets:[{data:ar.map(x=>+x[1].toFixed(1)),backgroundColor:'#3f8e8d',borderRadius:5}]},{indexAxis:'y',scales:{x:{grid:{color:'#edf2f5'}},y:{grid:{display:false}}}});
