@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: TENDENCIA CON ETIQUETAS DE DATOS -->
 <!-- VERSION: VISTA EJECUTIVA DONDE DEBEMOS ATACAR -->
 <!-- VERSION: PARETO ZONA DE ATAQUE + FIX MS + FIX ESCAPEHTML -->
 <!-- VERSION: PARETO ALTURA ALINEADA CON RANKING -->
@@ -189,6 +190,19 @@
 .executive-ranking .pareto-rank-row{grid-template-columns:27px 1fr auto;padding:8px 0}.ranking-footer{display:grid;gap:7px;border-top:1px solid #e7edf1;margin-top:10px;padding-top:10px;font-size:10px;color:#58728a}.ranking-footer i{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:-1px;margin-right:6px}.ranking-footer .key-priority{background:#17638f}.ranking-footer .key-rest{background:#b9c0c5}
 .insights-row{display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid #e1eaf0;border-radius:11px;margin-top:14px;overflow:hidden;background:#fbfdfe}.insights-row>div{padding:11px 14px;border-right:1px solid #e1eaf0}.insights-row>div:last-child{border-right:0}.insights-row b{display:block;font-size:9px;color:#58728a;letter-spacing:.35px;margin-bottom:3px}.insights-row span{display:block;font-size:10px;color:#284b67;line-height:1.35}
 @media(max-width:1000px){.executive-summary{grid-template-columns:1fr}.executive-layout{grid-template-columns:1fr}.executive-ranking{order:2}.insights-row{grid-template-columns:1fr}.insights-row>div{border-right:0;border-bottom:1px solid #e1eaf0}}
+
+/* === TENDENCIA EJECUTIVA CON ETIQUETAS DE DATOS === */
+.trend-executive{overflow:hidden}
+.trend-executive .charthead{margin-bottom:4px}
+.trend-summary-strip{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #e1eaf0;border-radius:12px;margin-top:12px;overflow:hidden;background:#fbfdfe}
+.trend-stat{padding:11px 14px;border-right:1px solid #e1eaf0}
+.trend-stat:last-child{border-right:0}
+.trend-stat small{display:block;font-size:9px;font-weight:800;color:#58728a;letter-spacing:.25px}
+.trend-stat strong{display:block;font-size:21px;color:#123f62;margin-top:2px}
+.trend-stat span{font-size:10px;color:#71879a}
+.trend-insight{margin-top:10px;padding:10px 14px;border-left:4px solid #2b78c5;border-radius:8px;background:#f5f9fc;color:#345b76;font-size:11px}
+@media(max-width:800px){.trend-summary-strip{grid-template-columns:1fr 1fr}.trend-stat:nth-child(2){border-right:0}.trend-stat:nth-child(n+3){border-top:1px solid #e1eaf0}}
+
 </style>
 
 <style>
@@ -239,7 +253,15 @@
 <div class="kpi"><div class="label">Batches procesados</div><div class="value" id="kBat">—</div><div class="semrow"><div class="lamp green"></div><div class="semtext"><b>ACTIVIDAD</b><span>Informativo</span></div></div><div class="sub">Batches únicos en la selección</div></div>
 </section>
 <div class="summary">Los KPI y gráficos se recalculan con la selección. Fecha, mes, semana, cliente y tela aplican a ambos libros; área y causa refinan el análisis de rechazos.</div>
-<section class="grid2"><div class="chartcard"><div class="charthead"><div><h3>Tendencia mensual — % rechazo</h3><span>Gerencia: evolución del desempeño frente a la meta del 5%</span></div><div><span class="badge">META ≤ 5%</span><span id="trendStatus" class="trend-status neutral">SIN DATOS</span></div></div><div class="canvasbox"><canvas id="trend"></canvas></div></div><div class="chartcard"><div class="charthead"><div><h3>Rechazo por área</h3><span>Concentración del impacto en kg</span></div><span class="badge">KG</span></div><div class="canvasbox"><canvas id="area"></canvas></div></div></section>
+<section class="grid2"><div class="chartcard"><div class="charthead"><div><h3>Tendencia mensual — % rechazo</h3><span>Gerencia: evolución del desempeño frente a la meta del 5%</span></div><div><span class="badge">META ≤ 5%</span><span id="trendStatus" class="trend-status neutral">SIN DATOS</span></div></div><div class="canvasbox"><canvas id="trend"></canvas>
+<div class="trend-summary-strip">
+  <div class="trend-stat"><small>PROMEDIO DEL PERÍODO</small><strong id="trendAvg">—</strong><span id="trendAvgPeriod">—</span></div>
+  <div class="trend-stat"><small>MEJOR DESEMPEÑO</small><strong id="trendBest">—</strong><span id="trendBestPeriod">—</span></div>
+  <div class="trend-stat"><small>PEOR DESEMPEÑO</small><strong id="trendWorst">—</strong><span id="trendWorstPeriod">—</span></div>
+  <div class="trend-stat"><small>ÚLTIMO PERÍODO</small><strong id="trendLast">—</strong><span id="trendLastPeriod">—</span></div>
+</div>
+<div class="trend-insight" id="trendInsight">—</div>
+</div></div><div class="chartcard"><div class="charthead"><div><h3>Rechazo por área</h3><span>Concentración del impacto en kg</span></div><span class="badge">KG</span></div><div class="canvasbox"><canvas id="area"></canvas></div></div></section>
 <section class="chartcard executive-causes">
 <div class="charthead"><div><h3>¿Dónde debemos atacar?</h3><span>Concentración y prioridad de las causas de rechazo</span></div><span class="badge">80/20</span></div>
 <div class="executive-summary">
@@ -447,10 +469,65 @@ function renderCharts(lf,rf){
  statusEl.className='trend-status '+statusClass;
  statusEl.textContent=statusText;
  const target=trendLabels.map(()=>5);
- chart('trend','line',{labels:trendLabels,datasets:[
-   {label:'% rechazo',data:trendValues,borderColor:'#35769a',backgroundColor:'rgba(53,118,154,.10)',pointRadius:trendLabels.length===1?6:4,pointHoverRadius:7,pointBackgroundColor:trendValues.map(v=>Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#9aaab6'),pointBorderColor:'#ffffff',pointBorderWidth:2,borderWidth:3,tension:.25,fill:true,segment:{borderColor:ctx=>{const v=ctx.p1?.parsed?.y;return v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d';}}},
-   {label:'Meta 5%',data:target,borderColor:'#7d8d9b',borderDash:[6,5],borderWidth:2,pointRadius:0,fill:false,tension:0}
- ]},{scales:{y:{beginAtZero:true,suggestedMax:Math.max(10,Math.ceil((Math.max(...validValues,5)||10)/2)*2),ticks:{callback:v=>v+'%'},grid:{color:'#e8eef2'}},x:{grid:{display:false},ticks:{maxRotation:monthlyMode?0:45,minRotation:monthlyMode?0:0,autoSkip:!monthlyMode,font:{size:9}}}},plugins:{legend:{display:false},tooltip:{callbacks:{title:ctx=>monthlyMode?ctx[0].label:ctx[0].label,label:ctx=>ctx.dataset.label==='Meta 5%'?'Meta: 5%':(Number.isFinite(ctx.raw)?ctx.raw.toFixed(2)+'% rechazo':'Sin datos')}}}});
+ chart('trend','line',{
+  labels:trendLabels,
+  datasets:[{
+    data:trendValues,
+    borderColor:'#357ca5',
+    backgroundColor:'rgba(53,124,165,.12)',
+    fill:true,
+    borderWidth:3,
+    pointRadius:5,
+    pointHoverRadius:7,
+    pointBorderWidth:2,
+    pointBackgroundColor:(ctx)=>{
+      const v=ctx.raw;
+      return v<=5?'#18a05a':(v<=7?'#e6a10b':'#df4a45');
+    },
+    pointBorderColor:'#fff',
+    tension:.25
+  }]
+},{maintainAspectRatio:false,
+  plugins:{
+    legend:{display:false},
+    tooltip:{callbacks:{label:ctx=>Number(ctx.raw).toFixed(2)+'%'}},
+    datalabels:{display:true,align:(ctx)=>ctx.dataIndex%2?'top':'bottom',anchor:'end',offset:6,
+      formatter:(v)=>Number(v).toFixed(1)+'%',
+      color:(ctx)=>{const v=ctx.raw;return v<=5?'#16944f':(v<=7?'#c78900':'#d43f3f');},
+      font:{weight:'800',size:11},
+      backgroundColor:'#fff',
+      borderColor:(ctx)=>{const v=ctx.raw;return v<=5?'#18a05a':(v<=7?'#e6a10b':'#df4a45');},
+      borderWidth:1,borderRadius:5,padding:4
+    }
+  },
+  scales:{
+    x:{grid:{display:false},ticks:{font:{size:9}}},
+    y:{beginAtZero:true,grid:{color:'#e8eef2'},ticks:{callback:v=>v+'%',font:{size:9}}}
+  }
+});
+
+(function(){
+  const _labels=trendLabels, _values=trendValues;
+  if(Array.isArray(_values) && _values.length){
+    const nums=_values.map(Number).filter(Number.isFinite);
+    const avg=nums.reduce((a,b)=>a+b,0)/nums.length;
+    const best=Math.min(...nums), worst=Math.max(...nums), last=nums[nums.length-1];
+    const bi=nums.indexOf(best), wi=nums.indexOf(worst);
+    $('trendAvg').textContent=avg.toFixed(1)+'%';
+    $('trendAvgPeriod').textContent='Promedio del período';
+    $('trendBest').textContent=best.toFixed(1)+'%';
+    $('trendBestPeriod').textContent=String(_labels[bi]||'');
+    $('trendWorst').textContent=worst.toFixed(1)+'%';
+    $('trendWorstPeriod').textContent=String(_labels[wi]||'');
+    $('trendLast').textContent=last.toFixed(1)+'%';
+    $('trendLastPeriod').textContent=String(_labels[_labels.length-1]||'');
+    const above=nums.filter(v=>v>5).length;
+    $('trendInsight').textContent=above
+      ? `El indicador supera la meta del 5% en ${above} de ${nums.length} períodos. Se recomienda enfocar acciones en los períodos fuera de meta.`
+      : 'El indicador se mantiene dentro de la meta del 5% en el período seleccionado.';
+  }
+})();
+
  const ar=aggregate(rf,'AREA RESPONSABLE').slice(0,8);chart('area','bar',{labels:ar.map(x=>x[0]),datasets:[{data:ar.map(x=>+x[1].toFixed(1)),backgroundColor:'#3f8e8d',borderRadius:5}]},{indexAxis:'y',scales:{x:{grid:{color:'#edf2f5'}},y:{grid:{display:false}}}});
  const cs=aggregate(rf,'CAUSA').slice(0,10),total=cs.reduce((s,x)=>s+x[1],0);
 let run=0;const rows=cs.map(([cause,kg],i)=>{run+=kg;return{cause,kg,pct:total?run/total*100:0,index:i}});
