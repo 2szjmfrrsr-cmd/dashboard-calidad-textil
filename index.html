@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V15 META LINE IN MONTHLY TREND -->
 <!-- VERSION: V14 DONUT INNER TEXT FIX -->
 <!-- VERSION: V13 DONUT VALUE CENTERED -->
 <!-- VERSION: V12 PARETO SIN ESPACIO DESAPROVECHADO -->
@@ -764,6 +765,39 @@
 .executive-causes .concentration-card>div:last-child{
   min-width:0!important;
 }
+
+/* === V15: LÍNEA DE META DENTRO DE TENDENCIA MENSUAL === */
+#monthlyChartWrap,
+.monthly-chart-wrap{
+  position:relative!important;
+}
+.canvasbox:has(.monthly-target-line){position:relative!important;}
+.monthly-target-line{
+  position:absolute!important;
+  left:0!important;
+  right:0!important;
+  height:0!important;
+  border-top:2px dashed #25a05a!important;
+  pointer-events:none!important;
+  z-index:4!important;
+}
+.monthly-target-label{
+  position:absolute!important;
+  right:8px!important;
+  transform:translateY(-50%)!important;
+  padding:3px 7px!important;
+  border-radius:6px!important;
+  background:#25a05a!important;
+  color:#fff!important;
+  font-size:9px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  pointer-events:none!important;
+  z-index:5!important;
+  box-shadow:0 1px 3px rgba(0,0,0,.08)!important;
+}
+
 </style>
 
 <style>
@@ -814,7 +848,10 @@
 <div class="kpi"><div class="label">Batches procesados</div><div class="value" id="kBat">—</div><div class="semrow"><div class="lamp green"></div><div class="semtext"><b>ACTIVIDAD</b><span>Informativo</span></div></div><div class="sub">Batches únicos en la selección</div></div>
 </section>
 <div class="summary">Los KPI y gráficos se recalculan con la selección. Fecha, mes, semana, cliente y tela aplican a ambos libros; área y causa refinan el análisis de rechazos.</div>
-<section class="grid2"><div class="chartcard"><div class="charthead"><div><h3>Tendencia mensual — % rechazo</h3><span>Gerencia: evolución del desempeño frente a la meta del 5%</span></div><div><span class="badge">META ≤ 5%</span><span id="trendStatus" class="trend-status neutral">SIN DATOS</span></div></div><div class="canvasbox"><canvas id="trend"></canvas></div>
+<section class="grid2"><div class="chartcard"><div class="charthead"><div><h3>Tendencia mensual — % rechazo</h3><span>Gerencia: evolución del desempeño frente a la meta del 5%</span></div><div><span class="badge">META ≤ 5%</span><span id="trendStatus" class="trend-status neutral">SIN DATOS</span></div></div><div class="canvasbox"><canvas id="trend">
+<div class="monthly-target-line" data-target="5"></div>
+<div class="monthly-target-label" data-target-label="5">META 5%</div>
+</canvas></div>
 <div class="trend-summary-strip">
   <div class="trend-stat"><small>PROMEDIO DEL PERÍODO</small><strong id="trendAvg">—</strong><span id="trendAvgPeriod">—</span></div>
   <div class="trend-stat"><small>MEJOR DESEMPEÑO</small><strong id="trendBest">—</strong><span id="trendBestPeriod">—</span></div>
@@ -1179,4 +1216,51 @@ function apply(){const [lf,rf]=filters();renderKpis(lf,rf);renderCharts(lf,rf);$
 function populate(){const dates=LIB.map(r=>iso(r.FECHA)).filter(Boolean);$('from').value=Math.min(...dates.map(Number).map(n=>n))?dates.sort()[0]:'';$('to').value=dates.sort().slice(-1)[0]||'';setupFilter(document.querySelector('[data-key="months"]'),'months',LIB.map(r=>r.MES),'Todos los meses',monthLabel);setupFilter(document.querySelector('[data-key="weeks"]'),'weeks',unique([...LIB.map(r=>r.SEMANA),...REJ.map(r=>r.SEMANA)]),'Todas las semanas');setupFilter(document.querySelector('[data-key="clients"]'),'clients',unique([...LIB.map(r=>r.CLIENTE),...REJ.map(r=>r.CLIENTE)]),'Todos');setupFilter(document.querySelector('[data-key="areas"]'),'areas',REJ.map(r=>r['AREA RESPONSABLE']),'Todas');setupFilter(document.querySelector('[data-key="causes"]'),'causes',REJ.map(r=>r.CAUSA),'Todas');setupFilter(document.querySelector('[data-key="telas"]'),'telas',unique([...LIB.map(r=>r.TELA),...REJ.map(r=>r.TELA)]),'Todas');document.querySelectorAll('input[type=date]').forEach(i=>i.onchange=apply);$('reset').onclick=()=>{document.querySelectorAll('.options input').forEach(i=>i.checked=false);Object.keys(state).forEach(k=>state[k].clear());document.querySelectorAll('.multi').forEach(el=>{el.querySelector('.selcount').textContent='Sin selección'});$('from').value=dates.sort()[0];$('to').value=dates.sort().slice(-1)[0];apply()};document.addEventListener('click',e=>{if(!e.target.closest('.multi'))document.querySelectorAll('.multi.open').forEach(x=>{x.classList.remove('open');x.querySelector('.selectbtn').classList.remove('open')})});apply()}
 async function load(){try{const res=await fetch(DATA_URL+'?v='+Date.now());if(!res.ok)throw new Error('No se pudo cargar '+DATA_URL+' ('+res.status+')');const ab=await res.arrayBuffer();const wb=XLSX.read(ab,{type:'array',cellDates:true});const lr=XLSX.utils.sheet_to_json(wb.Sheets['LIBERADOS'],{defval:null});const rr=XLSX.utils.sheet_to_json(wb.Sheets['RECHAZOS'],{defval:null});LIB=lr;REJ=rr;populate();$('loading').style.display='none'}catch(e){console.error(e);$('loading').style.display='none';$('error').style.display='block';$('error').textContent=(String(e.message||'').match(/(404|Failed to fetch|NetworkError|No se pudo cargar)/i)?'No fue posible cargar el archivo maestro. Verifica que DATA_DASHBOARD_CALIDAD_2026.xlsx esté en la raíz del repositorio y que el nombre sea exactamente igual. ':'Error interno del dashboard: ')+(e.message||e)} }
 load();
-</script></body></html>
+</script>
+<script>
+(function(){
+  function positionMonthlyTarget(){
+    const line = document.querySelector('.monthly-target-line');
+    const label = document.querySelector('.monthly-target-label');
+    if(!line || !label) return;
+
+    const canvas = line.previousElementSibling;
+    if(!canvas) return;
+
+    const chart = window.monthlyChart || window.trendMonthlyChart || window.monthlyTrendChart;
+    const rect = canvas.getBoundingClientRect();
+
+    // If the chart instance is available, use its y scale so the line is
+    // exactly at 5%, independent of chart height or max value.
+    if(chart && chart.scales){
+      const y = chart.scales.y || chart.scales['y-axis-0'];
+      if(y && typeof y.getPixelForValue === 'function'){
+        const pixel = y.getPixelForValue(5);
+        const canvasRect = canvas.getBoundingClientRect();
+        const parentRect = line.parentElement.getBoundingClientRect();
+        line.style.top = (pixel - canvasRect.top) + 'px';
+        label.style.top = (pixel - canvasRect.top) + 'px';
+        return;
+      }
+    }
+
+    // Fallback for the current dashboard: 0–10% scale.
+    const plotTop = 0;
+    const plotHeight = rect.height;
+    const y = plotTop + plotHeight * 0.5;
+    line.style.top = y + 'px';
+    label.style.top = y + 'px';
+  }
+
+  window.addEventListener('resize', positionMonthlyTarget);
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(positionMonthlyTarget, 100);
+    setTimeout(positionMonthlyTarget, 500);
+  });
+
+  // Expose a harmless helper so existing redraw logic can call it if needed.
+  window.updateMonthlyTargetLine = positionMonthlyTarget;
+})();
+</script>
+
+</body></html>
