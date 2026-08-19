@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V14 DONUT INNER TEXT FIX -->
 <!-- VERSION: V13 DONUT VALUE CENTERED -->
 <!-- VERSION: V12 PARETO SIN ESPACIO DESAPROVECHADO -->
 <!-- VERSION: V11 PARETO COMPOSICION VISUAL EJECUTIVA -->
@@ -692,6 +693,77 @@
   justify-content:center!important;
   pointer-events:none!important;
 }
+
+/* === V14: DONUT — TEXTO REALMENTE DENTRO DEL ARO === */
+.executive-causes .donut-wrap{
+  width:70px!important;
+  height:70px!important;
+  min-width:70px!important;
+  min-height:70px!important;
+  flex:0 0 70px!important;
+  position:relative!important;
+  overflow:hidden!important;
+}
+.executive-causes #paretoDonut{
+  width:70px!important;
+  height:70px!important;
+  display:block!important;
+}
+.executive-causes .donut-center{
+  position:absolute!important;
+  inset:0!important;
+  width:70px!important;
+  height:70px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+  overflow:hidden!important;
+  z-index:2!important;
+  pointer-events:none!important;
+}
+.executive-causes .donut-center strong,
+.executive-causes #paretoDonutValue{
+  display:block!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:0!important;
+  transform:none!important;
+  position:static!important;
+  text-align:center!important;
+  white-space:nowrap!important;
+  line-height:1!important;
+  font-size:14px!important;
+  font-weight:900!important;
+  letter-spacing:-.3px!important;
+  color:#df4a45!important;
+}
+.executive-causes .donut-center span{
+  display:block!important;
+  width:100%!important;
+  margin:3px 0 0!important;
+  padding:0!important;
+  position:static!important;
+  transform:none!important;
+  text-align:center!important;
+  white-space:nowrap!important;
+  line-height:1!important;
+  font-size:7px!important;
+  color:#6b7e8d!important;
+}
+
+/* El texto del bloque queda separado del donut y nunca puede invadirlo. */
+.executive-causes .concentration-card{
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+  min-width:0!important;
+}
+.executive-causes .concentration-card>div:last-child{
+  min-width:0!important;
+}
 </style>
 
 <style>
@@ -1083,7 +1155,7 @@ if($('insightFocus'))$('insightFocus').textContent=`Enfocar recursos en las prim
 if($('insightImpact'))$('insightImpact').textContent=`Una reducción en estas causas impactará directamente el rechazo total.`;
 if($('insightWatch'))$('insightWatch').textContent=rows.length?`Vigilar la tendencia de “${rows[0].cause}” y las demás causas prioritarias.`:'Sin datos suficientes.';
 const donutCtx=$('paretoDonut').getContext('2d');if(window.paretoDonutChart)window.paretoDonutChart.destroy();
-window.paretoDonutChart=new Chart(donutCtx,{type:'doughnut',data:{labels:['Prioridad','Resto'],datasets:[{data:[attackAccum,Math.max(0,100-attackAccum)],backgroundColor:['#df4a45','#dfe5e9'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{enabled:false}}}});
+window.paretoDonutChart=new Chart(donutCtx,{type:'doughnut',data:{labels:['Prioridad','Resto'],datasets:[{data:[attackAccum,Math.max(0,100-attackAccum)],backgroundColor:['#df4a45','#dfe5e9'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'82%',plugins:{legend:{display:false},tooltip:{enabled:false}}}});
 $('paretoRankingList').innerHTML=rows.map((r,i)=>`<div class="pareto-rank-row ${i<attackCount?'priority':''} ${i===attackCount-1?'attack-end':''}"><span class="pareto-rank-num">${i+1}</span><span><span class="pareto-rank-name">${escapeHtml(r.cause)}</span><span class="pareto-rank-kg">${r.kg.toLocaleString('en-US',{maximumFractionDigits:1})} kg</span></span><span class="pareto-rank-pct">${(r.kg/total*100).toFixed(2)}%</span></div>`).join('');
 chart('pareto','bar',{labels:rows.map(r=>r.cause),datasets:[{type:'bar',data:rows.map(r=>+r.kg.toFixed(1)),backgroundColor:rows.map((r,i)=>i<attackCount?'#2d7398':'#c4ccd1'),borderRadius:5,barPercentage:.72,categoryPercentage:.78},{type:'line',data:rows.map(r=>r.pct),borderColor:'#e68a22',pointBackgroundColor:rows.map((r,i)=>i===attackCount-1?'#df4a45':'#e68a22'),pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:rows.map((r,i)=>i===attackCount-1?7:2),yAxisID:'y1',tension:.25}]},{plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.type==='line'?ctx.raw.toFixed(1)+'% acumulado':ctx.raw.toLocaleString('en-US',{maximumFractionDigits:1})+' kg'}}},scales:{x:{ticks:{maxRotation:38,minRotation:38,font:{size:8}},grid:{display:false}},y:{beginAtZero:true,grid:{color:'#edf2f5'},ticks:{callback:v=>Number(v).toLocaleString('en-US')+' kg',font:{size:9}}},y1:{position:'right',beginAtZero:true,max:100,grid:{display:false},ticks:{callback:v=>v+'%',font:{size:8}}}}});
  const cl=aggregate(rf,'CLIENTE').slice(0,8);chart('client','bar',{labels:cl.map(x=>x[0]),datasets:[{data:cl.map(x=>+x[1].toFixed(1)),backgroundColor:'#438f8e',borderRadius:5}]},{indexAxis:'y',scales:{x:{grid:{color:'#edf2f5'}},y:{grid:{display:false},ticks:{font:{size:8}}}}});
