@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V11 PARETO COMPOSICION VISUAL EJECUTIVA -->
 <!-- VERSION: V10 CORRECCION OVERFLOW RECHAZO POR AREA -->
 <!-- VERSION: V9 OPCION 1 RANKING EJECUTIVO AREA -->
 <!-- VERSION: V8 SIN BATCHHEADER + ERROR REAL -->
@@ -469,6 +470,107 @@
   box-sizing:border-box!important;
 }
 
+
+/* === V11: PARETO — COMPOSICIÓN VISUAL EJECUTIVA === */
+.executive-causes{
+  overflow:hidden!important;
+}
+.executive-causes .pareto-layout{
+  align-items:stretch!important;
+}
+.executive-causes .pareto-chart-wrap{
+  display:flex!important;
+  flex-direction:column!important;
+  min-width:0!important;
+  height:100%!important;
+  padding:8px 10px 7px!important;
+  background:#fbfcfd!important;
+  border:1px solid #e4ebef!important;
+  border-radius:11px!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+.executive-causes .pareto-legend{
+  flex:0 0 auto!important;
+  margin:0 2px 3px!important;
+  padding:0!important;
+  min-height:18px!important;
+  font-size:9px!important;
+}
+.executive-causes .executive-canvas{
+  height:292px!important;
+  min-height:292px!important;
+  flex:0 0 292px!important;
+  width:100%!important;
+}
+.executive-causes #pareto{
+  width:100%!important;
+  height:292px!important;
+}
+
+/* Menos espacio muerto en la zona inferior del canvas. */
+.executive-causes .pareto-chart-wrap canvas{
+  display:block!important;
+}
+
+/* Ranking lateral alineado con el área de la gráfica. */
+.executive-causes .executive-ranking{
+  height:100%!important;
+  min-height:0!important;
+  box-sizing:border-box!important;
+}
+
+/* Nota 80/20 más visible y compacta. */
+.executive-causes .attack-zone-note{
+  margin-top:6px!important;
+  padding:7px 10px!important;
+  min-height:29px!important;
+  box-sizing:border-box!important;
+  font-size:9px!important;
+  line-height:1.25!important;
+}
+
+/* Mejor jerarquía para el encabezado del Pareto. */
+.executive-causes .charthead{
+  margin-bottom:8px!important;
+}
+.executive-causes .charthead h3{
+  margin-bottom:2px!important;
+}
+.executive-causes .charthead p{
+  margin-top:0!important;
+}
+
+/* Responsive: conserva proporciones y elimina cualquier overflow. */
+@media(max-width:1050px){
+  .executive-causes .pareto-chart-wrap{
+    padding:7px 8px 6px!important;
+  }
+  .executive-causes .executive-canvas,
+  .executive-causes #pareto{
+    height:275px!important;
+    min-height:275px!important;
+    flex-basis:275px!important;
+  }
+}
+@media(max-width:850px){
+  .executive-causes .pareto-layout{
+    grid-template-columns:1fr!important;
+  }
+  .executive-causes .pareto-chart-wrap{
+    height:auto!important;
+  }
+  .executive-causes .executive-canvas,
+  .executive-causes #pareto{
+    height:290px!important;
+    min-height:290px!important;
+    flex-basis:290px!important;
+  }
+  .executive-causes .executive-ranking{
+    height:auto!important;
+  }
+}
+
 </style>
 
 <style>
@@ -862,7 +964,7 @@ if($('insightWatch'))$('insightWatch').textContent=rows.length?`Vigilar la tende
 const donutCtx=$('paretoDonut').getContext('2d');if(window.paretoDonutChart)window.paretoDonutChart.destroy();
 window.paretoDonutChart=new Chart(donutCtx,{type:'doughnut',data:{labels:['Prioridad','Resto'],datasets:[{data:[attackAccum,Math.max(0,100-attackAccum)],backgroundColor:['#df4a45','#dfe5e9'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{enabled:false}}}});
 $('paretoRankingList').innerHTML=rows.map((r,i)=>`<div class="pareto-rank-row ${i<attackCount?'priority':''} ${i===attackCount-1?'attack-end':''}"><span class="pareto-rank-num">${i+1}</span><span><span class="pareto-rank-name">${escapeHtml(r.cause)}</span><span class="pareto-rank-kg">${r.kg.toLocaleString('en-US',{maximumFractionDigits:1})} kg</span></span><span class="pareto-rank-pct">${(r.kg/total*100).toFixed(2)}%</span></div>`).join('');
-chart('pareto','bar',{labels:rows.map(r=>r.cause),datasets:[{type:'bar',data:rows.map(r=>+r.kg.toFixed(1)),backgroundColor:rows.map((r,i)=>i<attackCount?'#2d7398':'#c4ccd1'),borderRadius:5,barPercentage:.72,categoryPercentage:.78},{type:'line',data:rows.map(r=>r.pct),borderColor:'#e68a22',pointBackgroundColor:rows.map((r,i)=>i===attackCount-1?'#df4a45':'#e68a22'),pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:rows.map((r,i)=>i===attackCount-1?6:2.5),yAxisID:'y1',tension:.25}]},{plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.type==='line'?ctx.raw.toFixed(1)+'% acumulado':ctx.raw.toLocaleString('en-US',{maximumFractionDigits:1})+' kg'}}},scales:{x:{ticks:{maxRotation:38,minRotation:38,font:{size:8}},grid:{display:false}},y:{beginAtZero:true,grid:{color:'#edf2f5'},ticks:{callback:v=>Number(v).toLocaleString('en-US')+' kg',font:{size:9}}},y1:{position:'right',beginAtZero:true,max:100,grid:{display:false},ticks:{callback:v=>v+'%',font:{size:8}}}}});
+chart('pareto','bar',{labels:rows.map(r=>r.cause),datasets:[{type:'bar',data:rows.map(r=>+r.kg.toFixed(1)),backgroundColor:rows.map((r,i)=>i<attackCount?'#2d7398':'#c4ccd1'),borderRadius:5,barPercentage:.72,categoryPercentage:.78},{type:'line',data:rows.map(r=>r.pct),borderColor:'#e68a22',pointBackgroundColor:rows.map((r,i)=>i===attackCount-1?'#df4a45':'#e68a22'),pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:rows.map((r,i)=>i===attackCount-1?7:2),yAxisID:'y1',tension:.25}]},{plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.type==='line'?ctx.raw.toFixed(1)+'% acumulado':ctx.raw.toLocaleString('en-US',{maximumFractionDigits:1})+' kg'}}},scales:{x:{ticks:{maxRotation:38,minRotation:38,font:{size:8}},grid:{display:false}},y:{beginAtZero:true,grid:{color:'#edf2f5'},ticks:{callback:v=>Number(v).toLocaleString('en-US')+' kg',font:{size:9}}},y1:{position:'right',beginAtZero:true,max:100,grid:{display:false},ticks:{callback:v=>v+'%',font:{size:8}}}}});
  const cl=aggregate(rf,'CLIENTE').slice(0,8);chart('client','bar',{labels:cl.map(x=>x[0]),datasets:[{data:cl.map(x=>+x[1].toFixed(1)),backgroundColor:'#438f8e',borderRadius:5}]},{indexAxis:'y',scales:{x:{grid:{color:'#edf2f5'}},y:{grid:{display:false},ticks:{font:{size:8}}}}});
  const weekMap={};rf.forEach(r=>{const w=String(r.SEMANA??'').trim();if(!w)return;if(!weekMap[w])weekMap[w]={k:0,v:0};weekMap[w].k+=num(r.KILOS_RECHAZO_DASHBOARD)});lf.forEach(r=>{const w=String(r.SEMANA??'').trim();if(!w)return;if(!weekMap[w])weekMap[w]={k:0,v:0};weekMap[w].v+=num(r.LIBERADO_KG_DASHBOARD)});const ws=Object.keys(weekMap).sort(sortWeeks);const weekValues=ws.map(w=>weekMap[w].v?+(weekMap[w].k/weekMap[w].v*100).toFixed(2):null);const latestWeek=weekValues.length?weekValues[weekValues.length-1]:NaN;const [wsc,wst]=trendStatus(latestWeek);const wse=$('weekTrendStatus');wse.className='trend-status weekly '+wsc;wse.textContent=wst;const weekLabels=ws.map(x=>{const m=String(x).match(/(\d+)(?:\D*)$/);return m?'Sem '+String(parseInt(m[1],10)).padStart(2,'0'):x});const weekPointColors=weekValues.map(v=>Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#9aaab6');chart('weekTrend','line',{labels:weekLabels,datasets:[{label:'% rechazo',data:weekValues,borderColor:'#6f8798',backgroundColor:'rgba(63,142,141,.08)',pointRadius:4,pointHoverRadius:7,pointBackgroundColor:weekPointColors,pointBorderColor:'#fff',pointBorderWidth:2,borderWidth:3,tension:.22,fill:true,segment:{borderColor:ctx=>{const v=ctx.p1?.parsed?.y;return Number.isFinite(v)?(v<=5?'#2fa95b':v<=7?'#e1a81f':'#d74d4d'):'#6f8798';}}},{label:'Meta 5%',data:ws.map(()=>5),borderColor:'#7d8d9b',borderDash:[6,5],borderWidth:2,pointRadius:0,fill:false,tension:0}]},{scales:{y:{beginAtZero:true,suggestedMax:Math.max(10,Math.ceil((Math.max(...weekValues.filter(Number.isFinite),5)||10)/5)*5),ticks:{callback:v=>v+'%'},grid:{color:'#e8eef2'}},x:{grid:{display:false},ticks:{maxRotation:45,minRotation:0,autoSkip:true,font:{size:9}}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.label==='Meta 5%'?'Meta: 5%':(Number.isFinite(ctx.raw)?ctx.raw.toFixed(2)+'% rechazo':'Sin datos')}}}});
 const bt=aggregate(rf,'BATCH').sort((a,b)=>b[1]-a[1]).slice(0,10);
