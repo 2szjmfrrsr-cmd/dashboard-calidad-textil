@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V34 SIN ETIQUETA CURVA -->
 <!-- VERSION: V33 CURVA SUTIL -->
 <!-- VERSION: V32 CURVA DE TENDENCIA -->
 <!-- VERSION: V31 MESES EN TEXTO -->
@@ -2149,6 +2150,7 @@ function renderCharts(lf,rf){
       labels:{boxWidth:14,boxHeight:1,padding:12,font:{size:8,weight:'600'}}
     },
     tooltip:{
+      filter:ctx=>ctx.dataset.label!=='Tendencia',
       callbacks:{
         label:ctx=>{
           if(ctx.dataset.label==='Curva de tendencia'){
