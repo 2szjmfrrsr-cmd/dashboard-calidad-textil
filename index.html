@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
 <!-- VERSION: PARETO ZONA DE ATAQUE + FIX MS + FIX ESCAPEHTML -->
+<!-- VERSION: PARETO ALTURA ALINEADA CON RANKING -->
 <!-- VERSION: PARETO ZONA DE ATAQUE + FIX MS -->
 <!-- VERSION: PARETO EJECUTIVO ZONA DE ATAQUE -->
 <!-- VERSION: TENDENCIA MENSUAL/SEMANAL ADAPTABLE -->
@@ -123,6 +124,53 @@
 .pareto-rank-row.priority .pareto-rank-num{background:#e24a42}.pareto-rank-name{font-size:10px;font-weight:800;color:#193b59;line-height:1.2}.pareto-rank-kg{display:block;font-size:10px;color:#58728a;margin-top:2px}.pareto-rank-pct{font-size:10px;font-weight:800;color:#58728a}.pareto-rank-row.attack-end .pareto-rank-pct{color:#e24a42}
 .pareto-key{margin-top:12px;padding-top:10px;border-top:1px solid #e8eef2;display:grid;gap:8px}.pareto-key div{display:flex;gap:8px;align-items:flex-start}.pareto-key i{width:12px;height:12px;border-radius:3px;margin-top:2px;flex:0 0 auto}.key-priority{background:#17638f}.key-rest{background:#b9c0c5}.pareto-key b{display:block;font-size:10px;color:#26445e}.pareto-key small{font-size:9px;color:#71879a}
 @media(max-width:1000px){.pareto-summary{grid-template-columns:1fr 1fr}.pareto-stat:nth-child(3),.pareto-stat:nth-child(4){border-top:1px solid #e1eaf0}.pareto-layout{grid-template-columns:1fr}.pareto-ranking{order:2}}
+
+
+/* === AJUSTE DE ALTURA PARETO / RANKING === */
+.pareto-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 285px;
+  gap:18px;
+  align-items:stretch;
+}
+.pareto-chart-wrap{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  height:100%;
+}
+.pareto-chart-wrap .canvasbox.tall{
+  height:auto !important;
+  min-height:0;
+  flex:1 1 auto;
+  position:relative;
+}
+.pareto-executive .canvasbox.tall{
+  height:100% !important;
+}
+.pareto-executive #pareto{
+  width:100% !important;
+  height:100% !important;
+  min-height:390px;
+}
+.pareto-ranking{
+  height:100%;
+  box-sizing:border-box;
+}
+.pareto-attack-note{
+  flex:0 0 auto;
+}
+@media(max-width:1000px){
+  .pareto-layout{
+    grid-template-columns:1fr;
+  }
+  .pareto-chart-wrap .canvasbox.tall{
+    min-height:400px;
+  }
+  .pareto-executive #pareto{
+    min-height:400px;
+  }
+}
 
 </style>
 
