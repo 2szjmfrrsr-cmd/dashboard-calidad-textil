@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V3 ESTRUCTURA CORREGIDA - TODO DENTRO DE WRAP -->
 <!-- VERSION: FIX ERROR NULL + TREND LAYOUT + NATIVE DATA LABELS -->
 <!-- VERSION: TENDENCIA CON ETIQUETAS DE DATOS -->
 <!-- VERSION: VISTA EJECUTIVA DONDE DEBEMOS ATACAR -->
@@ -212,6 +213,19 @@
 .trend-insight{margin-bottom:4px!important}
 .executive-causes{margin-top:18px!important}
 @media(max-width:800px){.grid2>.chartcard:first-child .canvasbox{height:270px!important}}
+
+/* === CORRECCIÓN DE ESTRUCTURA Y ANCHO === */
+.wrap{width:100%;max-width:1600px;margin:0 auto;padding:18px;box-sizing:border-box}
+.grid2{width:100%;box-sizing:border-box}
+.grid2>.chartcard{min-width:0}
+.executive-causes{width:100%;box-sizing:border-box}
+.pareto-layout{width:100%;box-sizing:border-box}
+.canvasbox{width:100%;position:relative}
+.canvasbox canvas{display:block;width:100%!important;height:100%!important}
+@media(max-width:900px){
+  .grid2{grid-template-columns:1fr!important}
+}
+
 </style>
 
 <style>
@@ -270,7 +284,7 @@
   <div class="trend-stat"><small>ÚLTIMO PERÍODO</small><strong id="trendLast">—</strong><span id="trendLastPeriod">—</span></div>
 </div>
 <div class="trend-insight" id="trendInsight">—</div>
-</div></div><div class="chartcard"><div class="charthead"><div><h3>Rechazo por área</h3><span>Concentración del impacto en kg</span></div><span class="badge">KG</span></div><div class="canvasbox"><canvas id="area"></canvas></div></div></section>
+</div><div class="chartcard"><div class="charthead"><div><h3>Rechazo por área</h3><span>Concentración del impacto en kg</span></div><span class="badge">KG</span></div><div class="canvasbox"><canvas id="area"></canvas></div></div></section>
 <section class="chartcard executive-causes">
 <div class="charthead"><div><h3>¿Dónde debemos atacar?</h3><span>Concentración y prioridad de las causas de rechazo</span></div><span class="badge">80/20</span></div>
 <div class="executive-summary">
