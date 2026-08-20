@@ -607,6 +607,83 @@
 }
 </style>
 
+
+<style id="daily-kpi-v3-css">
+.daily-kpi-strip{
+  display:grid !important;
+  grid-template-columns:minmax(310px,1.55fr) minmax(240px,1.05fr) minmax(130px,.55fr) minmax(270px,1.25fr);
+  gap:10px;
+  margin:0 0 12px;
+  align-items:stretch;
+}
+.daily-total-card,.daily-target-card,.daily-stat-card,.daily-main-area-card{
+  min-height:116px;
+  background:#fff;
+  border:1px solid #dbe5f0;
+  border-radius:13px;
+  box-shadow:0 3px 13px rgba(20,52,91,.055);
+}
+.daily-total-card{
+  display:flex;align-items:center;position:relative;overflow:hidden;padding:17px 20px 17px 24px;
+}
+.daily-total-accent{
+  position:absolute;left:0;top:0;bottom:0;width:5px;background:#e53935;
+}
+.daily-total-icon{
+  width:64px;height:64px;min-width:64px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:#fff1f1;color:#e53935;border:1px solid #ffd7d7;
+  font-size:17px;font-weight:900;margin-right:17px;
+}
+.daily-total-label{font-size:9px;font-weight:900;letter-spacing:.08em;color:#e53935}
+.daily-total-title{margin-top:3px;font-size:13px;font-weight:700;color:#16375f}
+.daily-total-value{margin-top:3px;font-size:36px;line-height:1;font-weight:900;color:#0c1f3b;letter-spacing:-.035em}
+.daily-total-value span{font-size:15px;color:#647a96;letter-spacing:0}
+.daily-total-caption{margin-top:5px;font-size:8.5px;color:#7a8da5}
+
+.daily-target-card{padding:16px 18px;display:flex;flex-direction:column;justify-content:center}
+.daily-target-label{font-size:9px;font-weight:900;letter-spacing:.07em;color:#617792}
+.daily-target-value{font-size:22px;font-weight:900;color:#143c69;margin-top:2px}
+.daily-target-value span{font-size:11px;color:#7890a9}
+.daily-target-track{
+  position:relative;height:9px;border-radius:7px;background:#eaf0f5;margin-top:10px;overflow:visible;
+}
+.daily-target-fill{height:100%;width:0;border-radius:7px;background:#2eaf68;transition:width .35s ease}
+.daily-target-marker{
+  position:absolute;left:88%;top:-4px;width:2px;height:17px;background:#173b63;border-radius:2px;
+}
+.daily-target-scale{display:flex;justify-content:space-between;margin-top:6px;font-size:7.5px;color:#8295aa}
+.daily-target-status{
+  margin-top:6px;font-size:8px;font-weight:900;color:#2eaf68;
+}
+.daily-target-status.over{color:#e53935}
+.daily-stat-card{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.daily-stat-card strong{font-size:30px;color:#0c3769;line-height:1;font-weight:900}
+.daily-stat-card span{margin-top:7px;font-size:8.5px;color:#6f849f;font-weight:700}
+
+.daily-main-area-card{
+  padding:15px 17px;display:flex;flex-direction:column;justify-content:center;
+  border-left:4px solid #e53935;
+}
+.daily-main-area-label{font-size:8px;font-weight:900;color:#e53935;letter-spacing:.06em}
+.daily-main-area-card>strong{font-size:17px;color:#153c67;margin-top:3px}
+.daily-main-area-detail{display:flex;align-items:baseline;gap:12px;margin-top:4px}
+.daily-main-area-detail b{font-size:12px;color:#183e66}
+.daily-main-area-detail span{font-size:13px;font-weight:900;color:#e53935}
+
+@media(max-width:1100px){
+  .daily-kpi-strip{grid-template-columns:1.4fr 1fr .55fr 1fr}
+}
+@media(max-width:850px){
+  .daily-kpi-strip{grid-template-columns:1fr 1fr}
+  .daily-total-card{grid-column:1/-1}
+}
+@media(max-width:600px){
+  .daily-kpi-strip{grid-template-columns:1fr}
+  .daily-total-card{grid-column:auto}
+}
+</style>
+
 </head><body><div class="app">
 <aside class="side"><div class="brand"><div class="mark">◇</div><span>RECHAZOS <b>ATS</b></span></div><nav class="nav"><button class="active" data-view="history"><span class="ico">▦</span>Desempeño histórico</button><button data-view="daily"><span class="ico">◫</span>Rendimiento diario</button></nav><div class="user"><div class="avatar">●</div><div><b>Administrador</b><br>Rol: Administrador</div></div></aside>
 <main>
@@ -670,21 +747,41 @@
 <div class="daily-kpi-strip">
   <div class="daily-total-card">
     <div class="daily-total-accent"></div>
-    <div>
+    <div class="daily-total-icon">KG</div>
+    <div class="daily-total-main">
       <div class="daily-total-label">IMPACTO DEL DÍA</div>
       <div class="daily-total-title">Kilos rechazados</div>
       <div class="daily-total-value" id="dailyKpiKg">0.00 <span>kg</span></div>
       <div class="daily-total-caption">Total de kilos rechazados en el día seleccionado</div>
     </div>
   </div>
-  <div class="daily-stat-card">
-    <strong id="dailyKpiLots">0</strong><span>Lotes rechazados</span>
+
+  <div class="daily-target-card">
+    <div class="daily-target-label">META MÁXIMA</div>
+    <div class="daily-target-value">1,440 <span>kg</span></div>
+    <div class="daily-target-track">
+      <div class="daily-target-fill" id="dailyTargetFill"></div>
+      <span class="daily-target-marker"></span>
+    </div>
+    <div class="daily-target-scale">
+      <span>0 kg</span>
+      <span>Meta 1,440 kg</span>
+    </div>
+    <div class="daily-target-status" id="dailyTargetStatus">Dentro de meta</div>
   </div>
+
   <div class="daily-stat-card">
-    <strong id="dailyKpiCauses">0</strong><span>Causas principales</span>
+    <strong id="dailyKpiLots">0</strong>
+    <span>Lotes rechazados</span>
   </div>
-  <div class="daily-stat-card">
-    <strong id="dailyKpiAreas">0</strong><span>Áreas afectadas</span>
+
+  <div class="daily-main-area-card">
+    <div class="daily-main-area-label">PRINCIPAL ÁREA AFECTADA</div>
+    <strong id="dailyMainArea">—</strong>
+    <div class="daily-main-area-detail">
+      <b id="dailyMainAreaKg">0.00 kg</b>
+      <span id="dailyMainAreaPct">0.0%</span>
+    </div>
   </div>
 </div>
 
@@ -970,16 +1067,42 @@ document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',(
       var date=getDate(), d=(typeof dailyData!=='undefined')?dailyData[date]:null;
       if(!d)return;
       var total=Number(d.total||0), lots=Array.isArray(d.batches)?d.batches.length:0, areas=Array.isArray(d.areas)?d.areas.length:0;
+      var dailyTarget=1440;
       var seen={};
       (d.batches||[]).forEach(function(b){var c=String(b[4]||'').trim();if(c)seen[c.toUpperCase()]=1});
       var kg=document.getElementById('dailyKpiKg');if(kg)kg.innerHTML=total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' <span>kg</span>';
       var lo=document.getElementById('dailyKpiLots');if(lo)lo.textContent=lots;
       var ca=document.getElementById('dailyKpiCauses');if(ca)ca.textContent=Object.keys(seen).length;
+      var targetFill=document.getElementById('dailyTargetFill');
+      var targetStatus=document.getElementById('dailyTargetStatus');
+      var ratio=total/dailyTarget;
+      if(targetFill){
+        targetFill.style.width=Math.min(ratio,1.12)*88+'%';
+        targetFill.style.background=total>dailyTarget?'#e53935':'#2eaf68';
+      }
+      if(targetStatus){
+        var diff=total-dailyTarget;
+        if(diff>0){
+          targetStatus.classList.add('over');
+          targetStatus.textContent='▲ '+diff.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' kg sobre la meta';
+        }else{
+          targetStatus.classList.remove('over');
+          targetStatus.textContent='▼ '+Math.abs(diff).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' kg disponibles';
+        }
+      }
       var ar=document.getElementById('dailyKpiAreas');if(ar)ar.textContent=areas;
 
       var areaLegend=document.getElementById('dailyAreaLegend');
       var areaColors=['#124c8f','#63b77b','#2b7bd5','#f5a623','#e53935'];
       var areaArr=(d.areas||[]).slice().sort(function(a,b){return Number(b[2]||0)-Number(a[2]||0)});
+      if(areaArr.length){
+        var mainArea=document.getElementById('dailyMainArea');
+        var mainAreaKg=document.getElementById('dailyMainAreaKg');
+        var mainAreaPct=document.getElementById('dailyMainAreaPct');
+        if(mainArea)mainArea.textContent=String(areaArr[0][0]||'—');
+        if(mainAreaKg)mainAreaKg.textContent=Number(areaArr[0][1]||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' kg';
+        if(mainAreaPct)mainAreaPct.textContent=Number(areaArr[0][2]||0).toFixed(1)+'%';
+      }
       if(areaLegend)areaLegend.innerHTML=areaArr.map(function(x,i){
         return '<div class="area-item"><i class="area-dot" style="background:'+areaColors[i%areaColors.length]+'"></i><div class="area-name">'+esc(x[0])+'</div><div class="area-meta"><span class="area-pct">'+Number(x[2]||0).toFixed(1)+'%</span><span class="area-kg">'+Number(x[1]||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' kg</span></div></div>'
       }).join('');
