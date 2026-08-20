@@ -684,6 +684,87 @@
 }
 </style>
 
+
+<style id="daily-kpi-liberados-css">
+.daily-kpi-strip{
+  display:grid!important;
+  grid-template-columns:minmax(330px,1.25fr) minmax(330px,1.15fr) minmax(130px,.45fr) minmax(300px,1.15fr);
+  gap:10px;margin:0 0 12px;align-items:stretch;
+}
+.daily-total-card,.daily-released-card,.daily-stat-card,.daily-main-area-card{
+  min-height:148px;background:#fff;border:1px solid #dbe5f0;border-radius:13px;
+  box-shadow:0 3px 13px rgba(20,52,91,.055);position:relative;overflow:hidden;
+}
+.daily-total-card{
+  display:flex;align-items:center;padding:18px 20px 18px 25px;
+}
+.daily-total-accent{position:absolute;left:0;top:0;bottom:0;width:5px;background:#e53935}
+.daily-total-icon{
+  width:65px;height:65px;min-width:65px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;background:#fff1f1;border:1px solid #ffd7d7;color:#e53935;
+  font-size:17px;font-weight:900;margin-right:17px;
+}
+.daily-total-label{font-size:9px;font-weight:900;letter-spacing:.08em;color:#e53935}
+.daily-total-title{margin-top:3px;font-size:13px;font-weight:800;color:#173b62}
+.daily-total-value{margin-top:2px;font-size:38px;line-height:1;font-weight:900;color:#e53935;letter-spacing:-.04em}
+.daily-total-value span{font-size:15px;color:#687d97;letter-spacing:0}
+.daily-meta-pill{
+  display:inline-block;margin-top:8px;padding:6px 9px;border-radius:7px;background:#f3f6fa;
+  color:#4c6684;font-size:9px;font-weight:800
+}
+.daily-meta-pill b{color:#173b62}
+.daily-total-caption{margin-top:5px;font-size:8.5px;font-weight:900;color:#e53935}
+.daily-total-caption.ok{color:#2eaf68}
+
+.daily-released-card{padding:19px 22px;display:flex;flex-direction:column;justify-content:center}
+.daily-released-label{font-size:9px;font-weight:900;letter-spacing:.07em;color:#173b62}
+.daily-released-value{font-size:34px;line-height:1.05;font-weight:900;color:#229b54;margin-top:5px;letter-spacing:-.03em}
+.daily-released-value span{font-size:14px;color:#6d829c;letter-spacing:0}
+.daily-released-sub{margin-top:7px;font-size:9px;color:#55718f;font-weight:700}
+.daily-check{
+  display:inline-flex;width:18px;height:18px;border-radius:50%;background:#e4f6eb;color:#229b54;
+  align-items:center;justify-content:center;font-weight:900;margin-right:5px
+}
+.daily-release-rate{
+  margin-top:10px;padding:8px 10px;border-radius:8px;background:#f0faf4;
+  display:flex;align-items:center;justify-content:space-between;gap:10px
+}
+.daily-release-rate span{font-size:8px;color:#66809c;font-weight:700}
+.daily-release-rate strong{display:block;margin-top:2px;font-size:15px;color:#229b54}
+.daily-release-rate small{font-size:7.5px;color:#6c849f;white-space:nowrap}
+
+.daily-stat-card{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.daily-stat-icon{
+  width:31px;height:31px;border-radius:8px;background:#eef1ff;color:#303dd0;
+  display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:7px
+}
+.daily-stat-card strong{font-size:31px;line-height:1;font-weight:900;color:#0c3769}
+.daily-stat-card span{margin-top:6px;font-size:8.5px;color:#647b96;font-weight:900;line-height:1.25}
+
+.daily-main-area-card{
+  padding:18px 18px;display:flex;flex-direction:column;justify-content:center;
+  border-left:4px solid #e53935
+}
+.daily-main-area-label{font-size:8px;font-weight:900;color:#e53935;letter-spacing:.06em}
+.daily-main-area-card>strong{font-size:18px;color:#173b62;margin-top:3px}
+.daily-main-area-detail{display:flex;align-items:baseline;justify-content:space-between;margin-top:6px}
+.daily-main-area-detail b{font-size:13px;color:#173b62}
+.daily-main-area-detail span{font-size:14px;font-weight:900;color:#e53935}
+.daily-main-area-track{height:8px;border-radius:6px;background:#edf1f5;margin-top:8px;overflow:hidden}
+.daily-main-area-track i{display:block;height:100%;width:0;background:#e53935;border-radius:6px}
+
+@media(max-width:1050px){
+  .daily-kpi-strip{grid-template-columns:1.2fr 1fr .5fr 1fr}
+}
+@media(max-width:820px){
+  .daily-kpi-strip{grid-template-columns:1fr 1fr}
+  .daily-total-card,.daily-released-card{min-height:135px}
+}
+@media(max-width:560px){
+  .daily-kpi-strip{grid-template-columns:1fr}
+}
+</style>
+
 </head><body><div class="app">
 <aside class="side"><div class="brand"><div class="mark">◇</div><span>RECHAZOS <b>ATS</b></span></div><nav class="nav"><button class="active" data-view="history"><span class="ico">▦</span>Desempeño histórico</button><button data-view="daily"><span class="ico">◫</span>Rendimiento diario</button></nav><div class="user"><div class="avatar">●</div><div><b>Administrador</b><br>Rol: Administrador</div></div></aside>
 <main>
@@ -752,27 +833,30 @@
       <div class="daily-total-label">IMPACTO DEL DÍA</div>
       <div class="daily-total-title">Kilos rechazados</div>
       <div class="daily-total-value" id="dailyKpiKg">0.00 <span>kg</span></div>
-      <div class="daily-total-caption">Total de kilos rechazados en el día seleccionado</div>
+      <div class="daily-meta-pill">META MÁXIMA: <b>1,440.00 kg</b></div>
+      <div class="daily-total-caption" id="dailyTargetStatus">Dentro de meta</div>
     </div>
   </div>
 
-  <div class="daily-target-card">
-    <div class="daily-target-label">META MÁXIMA</div>
-    <div class="daily-target-value">1,440 <span>kg</span></div>
-    <div class="daily-target-track">
-      <div class="daily-target-fill" id="dailyTargetFill"></div>
-      <span class="daily-target-marker"></span>
+  <div class="daily-released-card">
+    <div class="daily-released-label">KILOS LIBERADOS</div>
+    <div class="daily-released-value" id="dailyReleasedKg">0.00 <span>kg</span></div>
+    <div class="daily-released-sub">
+      <span class="daily-check">✓</span> Lotes aprobados sin rechazo
     </div>
-    <div class="daily-target-scale">
-      <span>0 kg</span>
-      <span>Meta 1,440 kg</span>
+    <div class="daily-release-rate">
+      <div>
+        <span>Rendimiento de liberación</span>
+        <strong id="dailyReleaseRate">0.0%</strong>
+      </div>
+      <small>del total procesado</small>
     </div>
-    <div class="daily-target-status" id="dailyTargetStatus">Dentro de meta</div>
   </div>
 
   <div class="daily-stat-card">
+    <div class="daily-stat-icon">▣</div>
     <strong id="dailyKpiLots">0</strong>
-    <span>Lotes rechazados</span>
+    <span>LOTES<br>rechazados</span>
   </div>
 
   <div class="daily-main-area-card">
@@ -782,6 +866,7 @@
       <b id="dailyMainAreaKg">0.00 kg</b>
       <span id="dailyMainAreaPct">0.0%</span>
     </div>
+    <div class="daily-main-area-track"><i id="dailyMainAreaFill"></i></div>
   </div>
 </div>
 
@@ -1068,10 +1153,23 @@ document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',(
       if(!d)return;
       var total=Number(d.total||0), lots=Array.isArray(d.batches)?d.batches.length:0, areas=Array.isArray(d.areas)?d.areas.length:0;
       var dailyTarget=1440;
+      var released=Number(d.released||d.liberated||d.kgLiberados||d.totalReleased||0);
+      if(!released && d.processed) released=Math.max(0,Number(d.processed)-total);
+      var processed=released+total;
       var seen={};
       (d.batches||[]).forEach(function(b){var c=String(b[4]||'').trim();if(c)seen[c.toUpperCase()]=1});
       var kg=document.getElementById('dailyKpiKg');if(kg)kg.innerHTML=total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' <span>kg</span>';
       var lo=document.getElementById('dailyKpiLots');if(lo)lo.textContent=lots;
+      var rel=document.getElementById('dailyReleasedKg');
+      var rate=document.getElementById('dailyReleaseRate');
+      if(rel)rel.innerHTML=released.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' <span>kg</span>';
+      if(rate)rate.textContent=(processed>0?(released/processed*100):0).toFixed(1)+'%';
+      var status=document.getElementById('dailyTargetStatus');
+      if(status){
+        var diff=total-dailyTarget;
+        if(diff>0){status.classList.remove('ok');status.textContent='▲ '+diff.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' kg sobre la meta ('+(total/dailyTarget*100).toFixed(1)+'%)';}
+        else{status.classList.add('ok');status.textContent='▼ '+Math.abs(diff).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' kg disponibles';}
+      }
       var ca=document.getElementById('dailyKpiCauses');if(ca)ca.textContent=Object.keys(seen).length;
       var targetFill=document.getElementById('dailyTargetFill');
       var targetStatus=document.getElementById('dailyTargetStatus');
@@ -1102,6 +1200,8 @@ document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',(
         if(mainArea)mainArea.textContent=String(areaArr[0][0]||'—');
         if(mainAreaKg)mainAreaKg.textContent=Number(areaArr[0][1]||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' kg';
         if(mainAreaPct)mainAreaPct.textContent=Number(areaArr[0][2]||0).toFixed(1)+'%';
+        var mainAreaFill=document.getElementById('dailyMainAreaFill');
+        if(mainAreaFill)mainAreaFill.style.width=Math.min(Number(areaArr[0][2]||0),100)+'%';
       }
       if(areaLegend)areaLegend.innerHTML=areaArr.map(function(x,i){
         return '<div class="area-item"><i class="area-dot" style="background:'+areaColors[i%areaColors.length]+'"></i><div class="area-name">'+esc(x[0])+'</div><div class="area-meta"><span class="area-pct">'+Number(x[2]||0).toFixed(1)+'%</span><span class="area-kg">'+Number(x[1]||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' kg</span></div></div>'
