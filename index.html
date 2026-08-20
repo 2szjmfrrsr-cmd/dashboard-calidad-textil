@@ -377,14 +377,14 @@ function buildDiarioDynamic(meta, rechazos, diaria, daySerials) {
       <div class="kpi beacon ${rateDia <= meta ? 'on-good' : 'on-bad'}" style="display:flex;flex-direction:column;height:100%"><span class="led ${rateDia <= meta ? 'good' : 'bad'}"></span><span class="glyph">%</span>
         <div class="label" style="color:var(--bad)">% de kilos rechazados</div>
         <div class="value ${rateDia <= meta ? 'good' : 'bad'}" style="margin-top:6px">${fmtPct(rateDia)}</div>
-        <div class="foot" style="margin-top:8px"><span class="pill ${rateDia <= meta ? 'good' : 'bad'}">${rateDia <= meta ? 'Dentro de meta' : 'Fuera de meta'}</span></div>
-        <div class="foot" style="margin-top:6px">Meta: ${fmtPct(meta)} · Diferencia: <b style="color:${rateDia <= meta ? 'var(--good)' : 'var(--bad)'}">${rateDia > meta ? '+' : ''}${((rateDia - meta) * 100).toFixed(1)} pts</b></div>
+        <div class="foot" style="margin-top:10px"><span class="pill ${rateDia <= meta ? 'good' : 'bad'}" style="white-space:nowrap">${rateDia <= meta ? 'Dentro de meta' : 'Fuera de meta'}</span></div>
+        <div class="foot" style="margin-top:8px;position:relative;z-index:1">Meta: ${fmtPct(meta)} · Diferencia: <b style="color:${rateDia <= meta ? 'var(--good)' : 'var(--bad)'}">${rateDia > meta ? '+' : ''}${((rateDia - meta) * 100).toFixed(1)} pts</b></div>
         <div class="semaforo" style="margin-top:auto"><span class="z" style="width:50%;background:var(--good)"></span><span class="z" style="width:25%;background:oklch(80% 0.15 90)"></span><span class="z" style="width:25%;background:var(--bad)"></span><span class="pin" style="left:${Math.min(96, rateDia / (meta * 2) * 100).toFixed(0)}%"></span></div>
       </div>
       <div class="kpi beacon on-bad" style="display:flex;flex-direction:column;height:100%;gap:14px;position:relative"><span class="led bad"></span><span class="glyph">⚖</span>
         <div style="display:flex;gap:14px;align-items:center">
           <div style="width:46px;height:46px;border-radius:50%;background:var(--bad-soft);color:var(--bad);display:grid;place-items:center;font-weight:800;font-size:12px;flex:none">KG</div>
-          <div style="flex:1;min-width:0"><div class="label" style="color:var(--ink-soft)">Impacto del día</div><div style="font-size:12.5px;font-weight:700;margin-top:2px">Kilos rechazados</div><div class="value bad" style="margin-top:4px">${fmtKg(totalKgDia)}</div><div class="foot">${rechazosDia.length} lotes rechazados · ${(totalKgDia / (rechazosDia.length || 1)).toFixed(0)} kg/lote prom.</div></div>
+          <div style="flex:1;min-width:0;position:relative;z-index:1"><div class="label" style="color:var(--ink-soft)">Impacto del día</div><div style="font-size:12.5px;font-weight:700;margin-top:2px">Kilos rechazados</div><div class="value bad" style="margin-top:4px">${fmtKg(totalKgDia)}</div><div class="foot">${rechazosDia.length} lotes rechazados · ${(totalKgDia / (rechazosDia.length || 1)).toFixed(0)} kg/lote prom.</div></div>
         </div>
         <div class="semaforo" style="margin-top:auto"><span class="z" style="width:50%;background:var(--good)"></span><span class="z" style="width:25%;background:oklch(80% 0.15 90)"></span><span class="z" style="width:25%;background:var(--bad)"></span><span class="pin" style="left:${Math.min(96, rateDia / (meta * 2) * 100).toFixed(0)}%"></span></div>
       </div>
@@ -392,7 +392,7 @@ function buildDiarioDynamic(meta, rechazos, diaria, daySerials) {
         <div class="label" style="color:var(--bad)">Principal área afectada</div>
         <div class="value" style="font-size:32px;margin-top:6px">${topAreaDia ? topAreaDia[0] : '—'}</div>
         <div class="foot" style="margin-top:8px">${topAreaDia ? fmtKg(topAreaDia[1]) : ''}${topAreaDia ? ` · ${(topAreaDia[1] / areaDiaTotal * 100).toFixed(1)}%` : ''}</div>
-        <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px">${areaDia.slice(1, 3).map(a => `<div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-soft)"><span>${a[0]}</span><span style="font-weight:700">${fmtKg(a[1])} · ${(a[1] / areaDiaTotal * 100).toFixed(0)}%</span></div>`).join('')}</div>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;position:relative;z-index:1">${areaDia.slice(1, 3).map(a => `<div style="display:flex;justify-content:space-between;gap:6px;font-size:10.5px;color:var(--ink-soft)"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a[0]}</span><span style="font-weight:700;white-space:nowrap;flex:none">${fmtKg(a[1])} · ${(a[1] / areaDiaTotal * 100).toFixed(0)}%</span></div>`).join('')}</div>
         <div class="semaforo" style="margin-top:auto"><span class="z" style="width:50%;background:var(--good)"></span><span class="z" style="width:25%;background:oklch(80% 0.15 90)"></span><span class="z" style="width:25%;background:var(--bad)"></span><span class="pin" style="left:${topAreaDia ? Math.min(96, (topAreaDia[1] / areaDiaTotal * 100)).toFixed(0) : 0}%"></span></div>
       </div>
       <div class="kpi" style="display:flex;flex-direction:column;gap:10px;position:relative">
@@ -403,7 +403,7 @@ function buildDiarioDynamic(meta, rechazos, diaria, daySerials) {
         <div style="border-top:1px solid var(--line);padding-top:8px">
           <div class="label" style="font-size:9.5px">Top 3 por kilos — cliente / tela</div>
           <div style="display:flex;flex-direction:column;gap:5px;margin-top:5px">
-            ${lotesDia.slice(0, 3).map(r => `<div style="display:flex;justify-content:space-between;gap:6px;font-size:10.5px"><span style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">${clean(r.CLIENTE)} · ${clean(r.TELA)}</span><span style="font-weight:800;color:var(--bad);flex:none">${Number(r.KILOS).toFixed(0)} kg</span></div>`).join('') || '<span style="font-size:10.5px;color:var(--ink-soft)">Sin lotes este día</span>'}
+            ${lotesDia.slice(0, 3).map(r => `<div style="display:flex;justify-content:space-between;gap:6px;font-size:10.5px"><span style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">${clean(r.CLIENTE)} · ${clean(r.TELA)}</span><span style="font-weight:800;color:var(--bad);white-space:nowrap;flex:none">${Number(r.KILOS).toFixed(0)} kg</span></div>`).join('') || '<span style="font-size:10.5px;color:var(--ink-soft)">Sin lotes este día</span>'}
           </div>
         </div>
       </div>
@@ -555,7 +555,7 @@ function render(data) {
     <div id="diario-dynamic">${buildDiarioDynamic(meta, rechazos, diaria, [lastDaySerial])}</div>
     <div class="card full">
       <div class="card-head"><div><h2>% de rechazo diario</h2><p class="desc">Kilos rechazados ÷ kilos liberados, por día del mes</p></div><span class="badge">Meta ≤ ${fmtPct(meta)}</span></div>
-      <div>${dailyChart({items: diaria.map(r => ({serial: r.FECHA, value: r['%_RECHAZO_S_BUENOS']})), meta, upToSerial: lastDaySerial, height: 220})}</div>
+      <div>${dailyChart({items: diaria.filter(r => { const wd = excelToDate(r.FECHA).getUTCDay(); return wd !== 0 && wd !== 6; }).map(r => ({serial: r.FECHA, value: r['%_RECHAZO_S_BUENOS']})), meta, upToSerial: lastDaySerial, height: 220})}</div>
       <p style="text-align:center;font-size:11px;color:var(--ink-soft);margin:10px 0 0">Cálculo: kg rechazados del día ÷ kg liberados del día × 100</p>
       <div class="legend"><span><i class="dot good"></i>Dentro de meta</span><span><i class="dot bad"></i>Fuera de meta</span><span><i class="dot pending"></i>Sin datos aún</span></div>
     </div>
