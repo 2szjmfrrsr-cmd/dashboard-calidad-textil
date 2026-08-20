@@ -5,7 +5,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
-<!-- VERSION: V40 RESUMEN EJECUTIVO DEL DIA -->
+<!-- VERSION: V41 FILTROS SECCION INFERIOR -->
+<!-- VERSION: V40.1 RESUMEN EJECUTIVO DEL DIA - FIX CSS + KG DIARIO -->
 <!-- VERSION: V39 LEYENDA CENTRADA Y BLOQUES DE AREA -->
 <!-- VERSION: V38 LEYENDA VISIBLE TENDENCIA -->
 <!-- VERSION: V37 LEYENDA LINEA DE TENDENCIA -->
@@ -1742,6 +1743,7 @@
   border-color:rgba(222,68,68,.42);
 }
 </style>
+<style>
 /* === V40: RESUMEN EJECUTIVO DEL DÍA === */
 .daily-section{
   margin-top:16px;
@@ -1968,6 +1970,39 @@
   .daily-batch-table td:nth-child(3){display:none}
   .daily-batch-table th,.daily-batch-table td{padding:8px 6px}
 }
+</style>
+<style>
+
+/* V40.1: ajuste visual del resumen diario */
+.daily-section{max-width:100%;position:relative}
+.daily-grid-top{grid-template-columns:minmax(300px,.85fr) minmax(480px,1.45fr)}
+.daily-area-card{min-height:178px}
+.daily-batches-card{background:#fff}
+.daily-batch-table th:nth-child(1){width:4%}
+.daily-batch-table th:nth-child(2){width:15%}
+.daily-batch-table th:nth-child(3){width:19%}
+.daily-batch-table th:nth-child(4){width:32%}
+.daily-batch-table th:nth-child(5){width:18%}
+.daily-batch-table th:nth-child(6){width:12%}
+.daily-batch-table td:nth-child(4){white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.daily-client-card{padding-bottom:2px}
+
+</style>
+
+<style>
+.historical-section{margin-top:18px}
+.historical-heading{
+  display:flex;align-items:center;justify-content:space-between;
+  margin:0 0 10px;padding:0 2px;
+}
+.historical-heading h2{
+  margin:0;color:#123b5d;font-size:16px;font-weight:900;
+}
+.historical-heading span{
+  display:block;margin-top:4px;color:#6d8495;font-size:9px;
+}
+.historical-section .filters{margin-top:0}
+</style>
 </head>
 <body>
 <div class="loading" id="loading">Cargando datos del archivo maestro…</div>
@@ -1982,17 +2017,6 @@
   </div>
   <div class="hero-accent" aria-hidden="true"></div>
 </header>
-<div class="panel filters"><div class="filtergrid">
-<div class="field"><label>DESDE</label><input id="from" type="date"></div><div class="field"><label>HASTA</label><input id="to" type="date"></div>
-<div class="field multi" data-key="months"><label>MES</label><button class="selectbtn month-selectbtn" type="button" aria-label="Seleccionar meses"><span class="select-summary" data-month-summary>Todos los meses</span><span class="select-arrow">⌄</span></button><div class="menu"><div class="menuhead"><div class="selcount">Sin selección</div><div class="menu-actions"><button class="all" type="button">Todas</button><button class="clear" type="button">Limpiar</button></div></div><div class="options"></div></div></div>
-<div class="field multi" data-key="weeks"><label>SEMANA</label><button class="selectbtn" type="button">Todas las semanas <span>⌄</span></button><div class="menu"><div class="menuhead"><div class="selcount">Sin selección</div><div class="menu-actions"><button class="all" type="button">Todas</button><button class="clear" type="button">Limpiar</button></div></div><div class="options"></div></div><div class="dependency-note">Semanas disponibles según el mes seleccionado</div></div>
-<div class="field multi" data-key="clients"><label>CLIENTE</label><button class="selectbtn" type="button">Todos <span>⌄</span></button><div class="menu"><div class="menuhead"><div class="selcount">Sin selección</div><div class="menu-actions"><button class="all" type="button">Todas</button><button class="clear" type="button">Limpiar</button></div></div><div class="options"></div></div></div>
-<div class="field multi" data-key="areas"><label>ÁREA RESPONSABLE</label><button class="selectbtn" type="button">Todas <span>⌄</span></button><div class="menu"><div class="menuhead"><div class="selcount">Sin selección</div><div class="menu-actions"><button class="all" type="button">Todas</button><button class="clear" type="button">Limpiar</button></div></div><div class="options"></div></div></div>
-<div class="field multi" data-key="causes"><label>CAUSA</label><button class="selectbtn" type="button">Todas <span>⌄</span></button><div class="menu"><div class="menuhead"><div class="selcount">Sin selección</div><div class="menu-actions"><button class="all" type="button">Todas</button><button class="clear" type="button">Limpiar</button></div></div><div class="options"></div></div></div>
-<div class="field multi" data-key="telas"><label>ARTÍCULO</label><button class="selectbtn" type="button">Todas <span>⌄</span></button><div class="menu"><div class="menuhead"><div class="selcount">Sin selección</div><div class="menu-actions"><button class="all" type="button">Todas</button><button class="clear" type="button">Limpiar</button></div></div><div class="options"></div></div></div>
-</div><div class="actions"><button class="btn primary" id="reset">Restablecer filtros</button></div><div class="summary" id="summary">Cargando selección…</div></div>
-<div class="error" id="error"></div>
-
 <section class="daily-section" id="dailySection">
   <div class="daily-head">
     <div>
@@ -2039,6 +2063,26 @@
     <div class="daily-client-grid daily-client-list" id="dailyClients"></div>
   </div>
 </section>
+
+<div class="historical-section">
+  <div class="historical-heading">
+    <div>
+      <h2>Análisis histórico y gestión</h2>
+      <span>Utiliza los filtros para profundizar en el comportamiento del rechazo.</span>
+    </div>
+  </div>
+<div class="panel filters"><div class="filtergrid">
+<div class="field"><label>DESDE</label><input id="from" type="date"></div><div class="field"><label>HASTA</label><input id="to" type="date"></div>
+<div class="field multi" data-key="months"><label>MES</label><button class="selectbtn month-selectbtn" type="button" aria-label="Seleccionar meses"><span class="select-summary" data-month-summary>Todos los meses</span><span class="select-arrow">⌄</span></button><div class="menu"><div class="menuhead"><div class="selcount">Sin selección</div><div class="menu-actions"><button class="all" type="button">Todas</button><button class="clear" type="button">Limpiar</button></div></div><div class="options"></div></div></div>
+<div class="field multi" data-key="weeks"><label>SEMANA</label><button class="selectbtn" type="button">Todas las semanas <span>⌄</span></button><div class="menu"><div class="menuhead"><div class="selcount">Sin selección</div><div class="menu-actions"><button class="all" type="button">Todas</button><button class="clear" type="button">Limpiar</button></div></div><div class="options"></div></div><div class="dependency-note">Semanas disponibles según el mes seleccionado</div></div>
+<div class="field multi" data-key="clients"><label>CLIENTE</label><button class="selectbtn" type="button">Todos <span>⌄</span></button><div class="menu"><div class="menuhead"><div class="selcount">Sin selección</div><div class="menu-actions"><button class="all" type="button">Todas</button><button class="clear" type="button">Limpiar</button></div></div><div class="options"></div></div></div>
+<div class="field multi" data-key="areas"><label>ÁREA RESPONSABLE</label><button class="selectbtn" type="button">Todas <span>⌄</span></button><div class="menu"><div class="menuhead"><div class="selcount">Sin selección</div><div class="menu-actions"><button class="all" type="button">Todas</button><button class="clear" type="button">Limpiar</button></div></div><div class="options"></div></div></div>
+<div class="field multi" data-key="causes"><label>CAUSA</label><button class="selectbtn" type="button">Todas <span>⌄</span></button><div class="menu"><div class="menuhead"><div class="selcount">Sin selección</div><div class="menu-actions"><button class="all" type="button">Todas</button><button class="clear" type="button">Limpiar</button></div></div><div class="options"></div></div></div>
+<div class="field multi" data-key="telas"><label>ARTÍCULO</label><button class="selectbtn" type="button">Todas <span>⌄</span></button><div class="menu"><div class="menuhead"><div class="selcount">Sin selección</div><div class="menu-actions"><button class="all" type="button">Todas</button><button class="clear" type="button">Limpiar</button></div></div><div class="options"></div></div></div>
+</div><div class="actions"><button class="btn primary" id="reset">Restablecer filtros</button></div><div class="summary" id="summary">Cargando selección…</div></div>
+<div class="error" id="error"></div>
+
+
 
 <section class="kpis">
 <div class="kpi"><div class="label">% rechazo</div><div class="value" id="kRej">—</div><div class="semrow"><div class="lamp" id="lRej"></div><div class="semtext"><b id="tRej">—</b><span>Meta ≤ 5.00%</span></div></div><div class="meter"><div class="needle" id="nRej"></div></div><div class="ticks"><span>0%</span><span>5%</span><span>7%</span><span>≥10%</span></div><div class="sub">Kg rechazados ÷ kg de tela liberada</div></div>
@@ -2270,19 +2314,25 @@ function renderDailyDashboard(){
   const dateText=day ? dateLabel(day) : '—';
   $('dailyDate').textContent='Día: '+dateText;
 
-  const totalKg=dayRows.reduce((s,r)=>s+num(r.KILOS_RECHAZO_DASHBOARD),0);
+  const totalKg=dayRows.reduce((s,r)=>{
+    const raw=r.KILOS;
+    const v=(raw!==null && raw!==undefined && raw!=='') ? Number(String(raw).replace(/,/g,'')) : num(r.KILOS_RECHAZO_DASHBOARD);
+    return s+(Number.isFinite(v)?v:0);
+  },0);
   const batches=new Map();
   const areas=new Map();
   const clients=new Map();
 
   dayRows.forEach(r=>{
-    const kg=num(r.KILOS_RECHAZO_DASHBOARD);
+    const rawKg=r.KILOS;
+    const kg=(rawKg!==null && rawKg!==undefined && rawKg!=='') ? Number(String(rawKg).replace(/,/g,'')) : num(r.KILOS_RECHAZO_DASHBOARD);
+    const safeKg=Number.isFinite(kg)?kg:0;
     const area=String(r['AREA RESPONSABLE']??'').trim() || 'Sin área';
     const client=String(r.CLIENTE??'').trim() || 'Sin cliente';
     const batch=String(r.BATCH??'').trim() || 'Sin lote';
 
-    areas.set(area,(areas.get(area)||0)+kg);
-    clients.set(client,(clients.get(client)||0)+kg);
+    areas.set(area,(areas.get(area)||0)+safeKg);
+    clients.set(client,(clients.get(client)||0)+safeKg);
 
     if(!batches.has(batch)){
       batches.set(batch,{
@@ -2295,7 +2345,7 @@ function renderDailyDashboard(){
       });
     }
     const b=batches.get(batch);
-    b.kg+=kg;
+    b.kg+=safeKg;
     b.events+=1;
     const cause=String(r.CAUSA??'').trim();
     if(cause)b.causes.add(cause);
@@ -2833,4 +2883,5 @@ load();
 </script>
 
 
+</div>
 </body></html>
