@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablero de control de rechazos DPF</title>
+<!-- VERSION: V40 RESUMEN EJECUTIVO DEL DIA -->
 <!-- VERSION: V39 LEYENDA CENTRADA Y BLOQUES DE AREA -->
 <!-- VERSION: V38 LEYENDA VISIBLE TENDENCIA -->
 <!-- VERSION: V37 LEYENDA LINEA DE TENDENCIA -->
@@ -1740,7 +1741,234 @@
   background:rgba(222,68,68,.28);
   border-color:rgba(222,68,68,.42);
 }
-</style></head>
+</style>
+/* === V40: RESUMEN EJECUTIVO DEL DÍA === */
+.daily-section{
+  margin-top:16px;
+  padding:18px;
+  border:1px solid #d8e4eb;
+  border-radius:16px;
+  background:#fff;
+  box-shadow:0 7px 24px rgba(24,61,91,.06);
+}
+.daily-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:14px;
+}
+.daily-title{
+  margin:0;
+  font-size:16px;
+  line-height:1.1;
+  font-weight:900;
+  color:#123b5d;
+}
+.daily-subtitle{
+  margin-top:5px;
+  font-size:9px;
+  color:#66809a;
+}
+.daily-date-badge{
+  flex:0 0 auto;
+  padding:7px 11px;
+  border-radius:999px;
+  background:#eef5f8;
+  color:#315f7c;
+  font-size:9px;
+  font-weight:850;
+}
+.daily-grid-top{
+  display:grid;
+  grid-template-columns:minmax(260px,.9fr) minmax(380px,1.35fr);
+  gap:12px;
+  align-items:stretch;
+}
+.daily-total-card,
+.daily-area-card,
+.daily-client-card,
+.daily-batches-card{
+  border:1px solid #e0e8ed;
+  border-radius:12px;
+  background:#fbfcfd;
+  min-width:0;
+}
+.daily-total-card{
+  padding:16px 18px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-height:178px;
+  background:linear-gradient(135deg,#fff 0%,#f7fbfc 100%);
+  border-left:4px solid #d95555;
+}
+.daily-eyebrow{
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.45px;
+  color:#718697;
+  text-transform:uppercase;
+}
+.daily-total{
+  margin-top:7px;
+  font-size:30px;
+  line-height:1;
+  font-weight:950;
+  color:#123b5d;
+}
+.daily-total span{
+  font-size:14px;
+  font-weight:800;
+  color:#58768b;
+}
+.daily-total-caption{
+  margin-top:9px;
+  font-size:9px;
+  color:#66809a;
+}
+.daily-total-meta{
+  display:flex;
+  gap:18px;
+  margin-top:14px;
+}
+.daily-mini strong{
+  display:block;
+  font-size:13px;
+  color:#163b59;
+}
+.daily-mini span{
+  display:block;
+  margin-top:2px;
+  font-size:8px;
+  color:#7a8d9a;
+}
+.daily-card-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px 14px 8px;
+}
+.daily-card-title h4{
+  margin:0;
+  font-size:10px;
+  color:#163b59;
+  font-weight:900;
+}
+.daily-card-title span{
+  font-size:8px;
+  color:#7890a0;
+}
+.daily-area-list,
+.daily-client-list{
+  padding:2px 14px 13px;
+}
+.daily-rank{
+  display:grid;
+  grid-template-columns:20px minmax(90px,1fr) minmax(90px,1.3fr) 92px;
+  gap:8px;
+  align-items:center;
+  min-height:31px;
+  border-bottom:1px solid #edf2f5;
+}
+.daily-rank:last-child{border-bottom:0}
+.daily-rank-num{
+  width:19px;height:19px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:#e9f0f4;color:#527084;font-size:7px;font-weight:900;
+}
+.daily-rank:first-child .daily-rank-num{
+  background:#ffe2e0;color:#c74440;
+}
+.daily-rank-name{
+  min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:#315a74;font-size:8.5px;font-weight:800;
+}
+.daily-bar{
+  height:7px;border-radius:999px;background:#e9eff2;overflow:hidden;
+}
+.daily-bar-fill{
+  height:100%;border-radius:999px;background:#3b8f8e;
+}
+.daily-rank-value{
+  text-align:right;color:#163b59;font-size:8.5px;font-weight:900;white-space:nowrap;
+}
+.daily-batches-card{
+  margin-top:12px;
+  overflow:hidden;
+}
+.daily-batch-table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+}
+.daily-batch-table th{
+  padding:8px 10px;
+  border-top:1px solid #e8eef2;
+  border-bottom:1px solid #e1e9ee;
+  background:#f5f8fa;
+  color:#718595;
+  text-align:left;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.2px;
+  text-transform:uppercase;
+}
+.daily-batch-table td{
+  padding:9px 10px;
+  border-bottom:1px solid #edf2f5;
+  color:#315a74;
+  font-size:8.5px;
+  vertical-align:middle;
+}
+.daily-batch-table tr:last-child td{border-bottom:0}
+.daily-batch-table .batch{
+  color:#163b59;font-weight:900;
+}
+.daily-batch-table .kg{
+  color:#163b59;font-weight:950;text-align:right;white-space:nowrap;
+}
+.daily-batch-table .events{
+  text-align:center;
+}
+.daily-event-badge{
+  display:inline-flex;
+  min-width:23px;height:20px;padding:0 6px;
+  align-items:center;justify-content:center;
+  border-radius:999px;background:#fff0d2;color:#9a6700;
+  font-size:8px;font-weight:900;
+}
+.daily-event-badge.high{
+  background:#ffe0de;color:#c53d39;
+}
+.daily-batch-sub{
+  display:block;margin-top:2px;color:#7890a0;font-size:7px;font-weight:600;
+}
+.daily-empty{
+  padding:22px 12px;text-align:center;color:#7890a0;font-size:9px;
+}
+.daily-client-card{margin-top:12px}
+.daily-client-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:0 12px;
+}
+.daily-client-grid .daily-rank{grid-template-columns:20px minmax(0,1fr) 82px}
+.daily-client-grid .daily-bar{display:none}
+@media(max-width:1000px){
+  .daily-grid-top{grid-template-columns:1fr}
+  .daily-client-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:650px){
+  .daily-section{padding:12px}
+  .daily-head{align-items:flex-start;flex-direction:column}
+  .daily-client-grid{grid-template-columns:1fr}
+  .daily-batch-table th:nth-child(3),
+  .daily-batch-table td:nth-child(3){display:none}
+  .daily-batch-table th,.daily-batch-table td{padding:8px 6px}
+}
+</head>
 <body>
 <div class="loading" id="loading">Cargando datos del archivo maestro…</div>
 <div class="wrap">
@@ -1764,6 +1992,54 @@
 <div class="field multi" data-key="telas"><label>ARTÍCULO</label><button class="selectbtn" type="button">Todas <span>⌄</span></button><div class="menu"><div class="menuhead"><div class="selcount">Sin selección</div><div class="menu-actions"><button class="all" type="button">Todas</button><button class="clear" type="button">Limpiar</button></div></div><div class="options"></div></div></div>
 </div><div class="actions"><button class="btn primary" id="reset">Restablecer filtros</button></div><div class="summary" id="summary">Cargando selección…</div></div>
 <div class="error" id="error"></div>
+
+<section class="daily-section" id="dailySection">
+  <div class="daily-head">
+    <div>
+      <h2 class="daily-title">Resumen ejecutivo del día</h2>
+      <div class="daily-subtitle">Lectura inmediata del rechazo registrado durante el día seleccionado.</div>
+    </div>
+    <div class="daily-date-badge" id="dailyDate">Día: —</div>
+  </div>
+
+  <div class="daily-grid-top">
+    <div class="daily-total-card">
+      <div class="daily-eyebrow">Total de kilos rechazados</div>
+      <div class="daily-total" id="dailyKgTotal">— <span>kg</span></div>
+      <div class="daily-total-caption">Impacto total del rechazo del día.</div>
+      <div class="daily-total-meta">
+        <div class="daily-mini"><strong id="dailyBatchCount">—</strong><span>lotes rechazados</span></div>
+        <div class="daily-mini"><strong id="dailyAreaCount">—</strong><span>áreas afectadas</span></div>
+        <div class="daily-mini"><strong id="dailyClientCount">—</strong><span>clientes afectados</span></div>
+      </div>
+    </div>
+
+    <div class="daily-area-card">
+      <div class="daily-card-title">
+        <h4>Kg rechazados por área</h4>
+        <span>Concentración del impacto</span>
+      </div>
+      <div class="daily-area-list" id="dailyAreas"></div>
+    </div>
+  </div>
+
+  <div class="daily-batches-card">
+    <div class="daily-card-title">
+      <h4>Lotes rechazados del día</h4>
+      <span id="dailyBatchCaption">Ordenados por kg rechazados</span>
+    </div>
+    <div id="dailyBatches"></div>
+  </div>
+
+  <div class="daily-client-card">
+    <div class="daily-card-title">
+      <h4>Kg rechazados por cliente</h4>
+      <span>Impacto del día</span>
+    </div>
+    <div class="daily-client-grid daily-client-list" id="dailyClients"></div>
+  </div>
+</section>
+
 <section class="kpis">
 <div class="kpi"><div class="label">% rechazo</div><div class="value" id="kRej">—</div><div class="semrow"><div class="lamp" id="lRej"></div><div class="semtext"><b id="tRej">—</b><span>Meta ≤ 5.00%</span></div></div><div class="meter"><div class="needle" id="nRej"></div></div><div class="ticks"><span>0%</span><span>5%</span><span>7%</span><span>≥10%</span></div><div class="sub">Kg rechazados ÷ kg de tela liberada</div></div>
 <div class="kpi"><div class="label">Kg rechazados</div><div class="value" id="kKg">—</div><div class="semrow"><div class="lamp" id="lKg"></div><div class="semtext"><b id="tKg">—</b><span>Según % rechazo</span></div></div><div class="meter"><div class="needle" id="nKg"></div></div><div class="ticks"><span>0%</span><span>5%</span><span>7%</span><span>≥10%</span></div><div class="sub" id="kgSub">Selección actual</div></div>
@@ -1983,6 +2259,110 @@ function inSet(v,set){return set.size===0||set.has(String(v))}
 function filters(){const from=$('from').value,to=$('to').value; const m=state.months,w=state.weeks,c=state.clients,t=state.telas,a=state.areas,ca=state.causes; const lf=LIB.filter(r=>{const d=iso(r.FECHA);return (!from||d>=from)&&(!to||d<=to)&&inSet(r.MES,m)&&inSet(r.SEMANA,w)&&inSet(r.CLIENTE,c)&&inSet(r.TELA,t)}); const rf=REJ.filter(r=>{const d=iso(r['FECHA RECHAZO']);return (!from||d>=from)&&(!to||d<=to)&&inSet(r.MES,m)&&inSet(r.SEMANA,w)&&inSet(r.CLIENTE,c)&&inSet(r.TELA,t)&&inSet(r['AREA RESPONSABLE'],a)&&inSet(r.CAUSA,ca)}); return [lf,rf]}
 function lamp(el,status){el.className='lamp '+status}
 function statusRej(v){return v<=.05?'green':v<=.07?'yellow':'red'} function statusApp(v){return v>=.95?'green':v>=.90?'yellow':'red'} function label(s){return s==='green'?'DENTRO DE META':s==='yellow'?'ATENCIÓN':'RECHAZO'}
+
+function renderDailyDashboard(){
+  const day=$('to')?.value || '';
+  const dayRows=REJ.filter(r=>{
+    const d=iso(r['FECHA RECHAZO']);
+    return day ? d===day : false;
+  });
+
+  const dateText=day ? dateLabel(day) : '—';
+  $('dailyDate').textContent='Día: '+dateText;
+
+  const totalKg=dayRows.reduce((s,r)=>s+num(r.KILOS_RECHAZO_DASHBOARD),0);
+  const batches=new Map();
+  const areas=new Map();
+  const clients=new Map();
+
+  dayRows.forEach(r=>{
+    const kg=num(r.KILOS_RECHAZO_DASHBOARD);
+    const area=String(r['AREA RESPONSABLE']??'').trim() || 'Sin área';
+    const client=String(r.CLIENTE??'').trim() || 'Sin cliente';
+    const batch=String(r.BATCH??'').trim() || 'Sin lote';
+
+    areas.set(area,(areas.get(area)||0)+kg);
+    clients.set(client,(clients.get(client)||0)+kg);
+
+    if(!batches.has(batch)){
+      batches.set(batch,{
+        kg:0,
+        events:0,
+        client,
+        fabric:String(r.TELA??'').trim() || '—',
+        causes:new Set(),
+        areas:new Set()
+      });
+    }
+    const b=batches.get(batch);
+    b.kg+=kg;
+    b.events+=1;
+    const cause=String(r.CAUSA??'').trim();
+    if(cause)b.causes.add(cause);
+    b.areas.add(area);
+  });
+
+  $('dailyKgTotal').innerHTML=fmt(totalKg,2)+' <span>kg</span>';
+  $('dailyBatchCount').textContent=fmt(batches.size,0);
+  $('dailyAreaCount').textContent=fmt(areas.size,0);
+  $('dailyClientCount').textContent=fmt(clients.size,0);
+
+  const areaData=[...areas.entries()].sort((a,b)=>b[1]-a[1]);
+  const maxArea=areaData[0]?.[1]||1;
+  $('dailyAreas').innerHTML=areaData.length
+    ? areaData.slice(0,6).map(([name,kg],i)=>`
+      <div class="daily-rank">
+        <div class="daily-rank-num">${i+1}</div>
+        <div class="daily-rank-name" title="${esc(name)}">${esc(name)}</div>
+        <div class="daily-bar"><div class="daily-bar-fill" style="width:${Math.max(2,kg/maxArea*100)}%"></div></div>
+        <div class="daily-rank-value">${fmt(kg,2)} kg</div>
+      </div>`).join('')
+    : '<div class="daily-empty">No hubo rechazos registrados para este día.</div>';
+
+  const batchData=[...batches.entries()].sort((a,b)=>b[1].kg-a[1].kg);
+  $('dailyBatchCaption').textContent=batchData.length
+    ? `${batchData.length} lote${batchData.length===1?'':'s'} rechazado${batchData.length===1?'':'s'} · ordenados por impacto`
+    : 'Sin rechazos registrados';
+
+  if(batchData.length){
+    const rows=batchData.slice(0,10).map(([batch,b],i)=>{
+      const cause=[...b.causes].slice(0,2).join(' · ') || '—';
+      const area=[...b.areas].slice(0,1).join('') || '—';
+      const eventClass=b.events>=4?' high':'';
+      return `<tr>
+        <td style="width:4%"><b>${i+1}</b></td>
+        <td style="width:17%"><span class="batch">${esc(batch)}</span></td>
+        <td style="width:16%"><span>${esc(b.client)}</span><span class="daily-batch-sub">${esc(b.fabric)}</span></td>
+        <td style="width:23%"><span>${esc(cause)}</span><span class="daily-batch-sub">${esc(area)}</span></td>
+        <td class="kg" style="width:18%">${fmt(b.kg,2)} kg</td>
+        <td class="events" style="width:10%"><span class="daily-event-badge${eventClass}">${b.events}</span><span class="daily-batch-sub">eventos</span></td>
+      </tr>`;
+    }).join('');
+
+    $('dailyBatches').innerHTML=`
+      <div style="overflow:auto">
+        <table class="daily-batch-table">
+          <thead><tr>
+            <th>#</th><th>LOTE</th><th>CLIENTE / TELA</th><th>CAUSA / ÁREA</th><th>KG RECHAZADOS</th><th>EVENTOS</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }else{
+    $('dailyBatches').innerHTML='<div class="daily-empty">No hubo lotes rechazados durante el día seleccionado.</div>';
+  }
+
+  const clientData=[...clients.entries()].sort((a,b)=>b[1]-a[1]);
+  $('dailyClients').innerHTML=clientData.length
+    ? clientData.slice(0,8).map(([name,kg],i)=>`
+      <div class="daily-rank">
+        <div class="daily-rank-num">${i+1}</div>
+        <div class="daily-rank-name" title="${esc(name)}">${esc(name)}</div>
+        <div class="daily-rank-value">${fmt(kg,2)} kg</div>
+      </div>`).join('')
+    : '<div class="daily-empty" style="grid-column:1/-1">No hubo rechazos registrados para este día.</div>';
+}
+
 function renderKpis(lf,rf){const vol=lf.reduce((s,r)=>s+num(r.LIBERADO_KG_DASHBOARD),0), kg=rf.reduce((s,r)=>s+num(r.KILOS_RECHAZO_DASHBOARD),0), rej=vol?kg/vol:0, app=Math.max(0,1-rej), batches=new Set(lf.map(r=>String(r.BATCH))).size; $('kRej').textContent=pct(rej);$('kKg').textContent=fmt(kg,2)+' kg';$('kApp').textContent=pct(app);$('kVol').textContent=fmt(vol,0)+' kg';$('kBat').textContent=fmt(batches);$('kgSub').textContent=fmt(kg,2)+' kg · selección actual';$('volSub').textContent=fmt(vol,2)+' kg · selección actual'; const sr=statusRej(rej),sa=statusApp(app); ['lRej','lKg'].forEach(id=>lamp($(id),sr));lamp($('lApp'),sa);$('tRej').textContent=label(sr);$('tKg').textContent=label(sr);$('tApp').textContent=label(sa);$('nRej').style.left=Math.min(98,rej/.10*100)+'%';$('nKg').style.left=Math.min(98,rej/.10*100)+'%';$('nApp').style.left=Math.min(98,Math.max(0,(app-.90)/.10*100))+'%';
  const cRej=$('kRej').closest('.kpi'),cKg=$('kKg').closest('.kpi'),cApp=$('kApp').closest('.kpi'),cVol=$('kVol').closest('.kpi'),cBat=$('kBat').closest('.kpi');
  [cRej,cKg,cApp].forEach(c=>c.classList.remove('state-green','state-yellow','state-red')); cRej.classList.add('state-'+sr); cKg.classList.add('state-'+sr); cApp.classList.add('state-'+sa); cVol.classList.remove('state-info-blue','state-info-purple'); cBat.classList.remove('state-info-blue','state-info-purple'); cVol.classList.add('state-info-blue'); cBat.classList.add('state-info-purple');
@@ -2417,7 +2797,7 @@ function monthLabel(value){
   const idx=parseInt(m[2],10)-1;
   return idx>=0&&idx<12?names[idx]+' '+m[1]:s;
 }
-function apply(){const [lf,rf]=filters();renderKpis(lf,rf);renderCharts(lf,rf);$('summary').textContent=`${fmt(lf.length)} registros liberación · ${fmt(rf.length)} registros rechazo · KPI según selección`}
+function apply(){const [lf,rf]=filters();renderDailyDashboard();renderKpis(lf,rf);renderCharts(lf,rf);$('summary').textContent=`${fmt(lf.length)} registros liberación · ${fmt(rf.length)} registros rechazo · KPI según selección`}
 function populate(){const dates=LIB.map(r=>iso(r.FECHA)).filter(Boolean);$('from').value=Math.min(...dates.map(Number).map(n=>n))?dates.sort()[0]:'';$('to').value=dates.sort().slice(-1)[0]||'';setupFilter(document.querySelector('[data-key="months"]'),'months',LIB.map(r=>r.MES),'Todos los meses',monthLabel);setupFilter(document.querySelector('[data-key="weeks"]'),'weeks',unique([...LIB.map(r=>r.SEMANA),...REJ.map(r=>r.SEMANA)]),'Todas las semanas');setupFilter(document.querySelector('[data-key="clients"]'),'clients',unique([...LIB.map(r=>r.CLIENTE),...REJ.map(r=>r.CLIENTE)]),'Todos');setupFilter(document.querySelector('[data-key="areas"]'),'areas',REJ.map(r=>r['AREA RESPONSABLE']),'Todas');setupFilter(document.querySelector('[data-key="causes"]'),'causes',REJ.map(r=>r.CAUSA),'Todas');setupFilter(document.querySelector('[data-key="telas"]'),'telas',unique([...LIB.map(r=>r.TELA),...REJ.map(r=>r.TELA)]),'Todas');document.querySelectorAll('input[type=date]').forEach(i=>i.onchange=apply);$('reset').onclick=()=>{document.querySelectorAll('.options input').forEach(i=>i.checked=false);Object.keys(state).forEach(k=>state[k].clear());document.querySelectorAll('.multi').forEach(el=>{el.querySelector('.selcount').textContent='Sin selección'});$('from').value=dates.sort()[0];$('to').value=dates.sort().slice(-1)[0];apply()};document.addEventListener('click',e=>{if(!e.target.closest('.multi'))document.querySelectorAll('.multi.open').forEach(x=>{x.classList.remove('open');x.querySelector('.selectbtn').classList.remove('open')})});apply()}
 async function load(){
   const hideLoading=()=>{const el=$('loading');if(el)el.style.display='none'};
