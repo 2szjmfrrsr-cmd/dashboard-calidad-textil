@@ -57,12 +57,13 @@
   .updated{display:flex;align-items:center;gap:10px;font-size:11.5px;color:var(--ink-soft);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 13px}
   .updated b{color:var(--ink);display:block;font-size:12px}
   .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+  .kpis.cols-5{grid-template-columns:repeat(5,1fr)}
   .kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:17px 19px;box-shadow:var(--shadow)}
-  .kpi .label{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
-  .kpi .value{margin-top:8px;font-size:28px;font-weight:800;letter-spacing:-.02em}
+  .kpi .label{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+  .kpi .value{margin-top:8px;font-size:34px;font-weight:800;letter-spacing:-.02em}
   .kpi .value.good{color:var(--good)}
   .kpi .value.bad{color:var(--bad)}
-  .kpi .foot{margin-top:6px;font-size:11.5px;color:var(--ink-soft)}
+  .kpi .foot{margin-top:6px;font-size:12.5px;color:var(--ink-soft)}
   .pill{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px}
   .pill.good{background:var(--good-soft);color:var(--good)}
   .pill.bad{background:var(--bad-soft);color:var(--bad)}
@@ -72,6 +73,7 @@
   .card h2{margin:0;font-size:14.5px;font-weight:700}
   .card .desc{margin:3px 0 0;font-size:11.5px;color:var(--ink-soft)}
   .card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+  .card-head>div:first-child{flex:1;min-width:0}
   .badge{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:5px 10px;white-space:nowrap}
   .legend{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:10px;font-size:11px;color:var(--ink-soft);font-weight:600}
   .legend span{display:inline-flex;align-items:center;gap:6px}
@@ -122,7 +124,7 @@
   .state code{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:2px 6px;font-size:12px}
   .view{display:none}
   .view.active{display:block}
-  @media(max-width:1050px){.kpis{grid-template-columns:1fr 1fr}.grid2,.grid3{grid-template-columns:1fr}}
+  @media(max-width:1050px){.kpis{grid-template-columns:1fr 1fr}.kpis.cols-5{grid-template-columns:1fr 1fr}.grid2,.grid3{grid-template-columns:1fr}}
   @media(max-width:760px){.side{width:76px;padding:20px 10px}.brand .txt,nav.nav button span{display:none}.brand{justify-content:center}nav.nav button{justify-content:center}main{padding:20px 16px}}
 </style>
 </head>
@@ -162,7 +164,7 @@ const CFG = window.DASHBOARD_CONFIG || {};
 document.title = CFG.dashboardTitle || 'Tablero de Calidad Textil';
 
 const excelToDate = s => new Date(Math.round((s - 25569) * 86400 * 1000));
-const fmtDate = (s, opts) => excelToDate(s).toLocaleDateString('es-ES', opts || {day:'2-digit', month:'short'});
+const fmtDate = (s, opts) => excelToDate(s).toLocaleDateString('es-ES', {timeZone: 'UTC', ...(opts || {day:'2-digit', month:'short'})});
 const fmtPct = v => (v * 100).toFixed(1).replace('.', ',') + '%';
 const fmtKg = v => v.toLocaleString('es-ES', {maximumFractionDigits: 0}) + ' kg';
 const clean = s => (s || '').toString().trim();
@@ -209,7 +211,7 @@ function aggBy(rows, key) {
   return [...m.entries()].sort((a, b) => b[1] - a[1]);
 }
 
-const AREA_COLORS = ['oklch(56% 0.15 255)', 'oklch(56% 0.13 152)', 'oklch(60% 0.14 70)', 'oklch(58% 0.18 25)', 'oklch(55% 0.12 300)'];
+const AREA_COLORS = ['oklch(78% 0.09 255)', 'oklch(78% 0.09 152)', 'oklch(82% 0.09 70)', 'oklch(80% 0.11 25)', 'oklch(80% 0.08 300)'];
 
 function yAxisTicks(max, count = 4) {
   const ticks = [];
@@ -217,25 +219,108 @@ function yAxisTicks(max, count = 4) {
   return ticks;
 }
 
+function lineChart({items, meta, height = 220}) {
+  const max = Math.max(meta * 1.4, ...items.filter(i => !i.pending).map(i => i.value), 0.01) * 1.1;
+  const n = items.length;
+  const yFor = v => (1 - Math.min(v, max) / max) * 100;
+  const xFor = i => n === 1 ? 50 : 4 + (i / (n - 1)) * 92;
+  const metaY = yFor(meta);
+  const ticks = yAxisTicks(max);
+  const yLabels = ticks.map(t => `<div style="font-size:11.5px;font-weight:600;color:var(--ink-soft);line-height:1">${(t * 100).toFixed(0)}%</div>`).join('');
+  const pathPts = items.map((it, i) => `${xFor(i)},${yFor(it.value)}`).join(' L ');
+  let bands = '';
+  for (let i = 0; i < n - 1; i++) {
+    const v0 = items[i].value, v1 = items[i + 1].value;
+    const x0 = xFor(i), x1 = xFor(i + 1);
+    const y0 = yFor(v0), y1 = yFor(v1);
+    const quad = (ax, ay, bx, by, grad) => `<polygon points="${ax},${ay} ${bx},${by} ${bx},100 ${ax},100" fill="url(#${grad})"/>`;
+    const sameSide = (v0 <= meta) === (v1 <= meta);
+    if (sameSide) {
+      bands += quad(x0, y0, x1, y1, v0 <= meta ? 'lg-good' : 'lg-bad');
+    } else {
+      const t = (meta - v0) / (v1 - v0);
+      const xc = x0 + t * (x1 - x0);
+      bands += quad(x0, y0, xc, metaY, v0 <= meta ? 'lg-good' : 'lg-bad');
+      bands += quad(xc, metaY, x1, y1, v1 <= meta ? 'lg-good' : 'lg-bad');
+    }
+  }
+  const dots = items.map((it, i) => {
+    const x = xFor(i), y = yFor(it.value);
+    const color = it.pending ? 'var(--pending)' : (it.value <= meta ? 'var(--good)' : 'var(--bad)');
+    const labelColor = it.pending ? 'var(--ink-soft)' : (it.value <= meta ? 'var(--good)' : 'var(--bad)');
+    const above = y > 18;
+    return `<div style="position:absolute;left:${x}%;top:${y}%;transform:translate(-50%,-50%);width:9px;height:9px;border-radius:50%;background:${color};border:2px solid var(--panel);box-shadow:0 1px 3px oklch(20% 0.02 250 / .2)"></div>
+      <div style="position:absolute;left:${x}%;top:${above ? `calc(${y}% - 20px)` : `calc(${y}% + 12px)`};transform:translateX(-50%);font-size:12.5px;font-weight:800;color:${labelColor};white-space:nowrap">${(it.value * 100).toFixed(1)}%</div>`;
+  }).join('');
+  return `<div style="display:flex;gap:8px;height:${height}px">
+    <div style="display:flex;flex-direction:column;justify-content:space-between;text-align:right;flex:none;padding-bottom:2px">${yLabels}</div>
+    <div style="flex:1;min-width:0;position:relative">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">
+        <defs>
+          <linearGradient id="lg-good" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--good)" stop-opacity=".38"/><stop offset="100%" stop-color="var(--good)" stop-opacity="0"/></linearGradient>
+          <linearGradient id="lg-bad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--bad)" stop-opacity=".38"/><stop offset="100%" stop-color="var(--bad)" stop-opacity="0"/></linearGradient>
+        </defs>
+        ${bands}
+        <line x1="0" y1="${metaY}" x2="100" y2="${metaY}" stroke="var(--good)" stroke-width="0.5" stroke-dasharray="2 1.5" vector-effect="non-scaling-stroke"/>
+        <polyline points="${pathPts}" fill="none" stroke="var(--accent)" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+      </svg>
+      <div style="position:absolute;right:2px;top:${metaY}%;transform:translateY(-100%);font-size:11px;font-weight:800;color:var(--good);background:var(--panel);padding:0 4px">META ${(meta * 100).toFixed(0)}%</div>
+      ${dots}
+    </div>
+  </div>
+  <div style="display:flex;margin-top:8px;margin-left:34px">${items.map(it => `<div style="flex:1;min-width:0;text-align:center;font-size:10.5px;color:var(--ink-soft);font-weight:600;white-space:nowrap;overflow:hidden">${it.label}</div>`).join('')}</div>`;
+}
+
 function barChart({items, meta, height = 220}) {
   const max = Math.max(meta * 1.35, ...items.map(i => i.value)) || 1;
   const metaTop = Math.max(0, Math.min(100, (1 - meta / max) * 100));
   const ticks = yAxisTicks(max);
+  const n = items.length;
+  const xAt = i => (i + 0.5) / n * 100;
+  const yAt = v => Math.max(0, Math.min(100, (1 - v / max) * 100));
+  let sx = 0, sx2 = 0, sx3 = 0, sx4 = 0, sy = 0, sxy = 0, sx2y = 0;
+  items.forEach((it, i) => {
+    const x = i, y = it.value;
+    sx += x; sx2 += x * x; sx3 += x ** 3; sx4 += x ** 4;
+    sy += y; sxy += x * y; sx2y += x * x * y;
+  });
+  const M = [[n, sx, sx2, sy], [sx, sx2, sx3, sxy], [sx2, sx3, sx4, sx2y]];
+  for (let col = 0; col < 3; col++) {
+    let piv = col;
+    for (let r = col + 1; r < 3; r++) if (Math.abs(M[r][col]) > Math.abs(M[piv][col])) piv = r;
+    [M[col], M[piv]] = [M[piv], M[col]];
+    if (Math.abs(M[col][col]) < 1e-9) continue;
+    for (let r = 0; r < 3; r++) {
+      if (r === col) continue;
+      const f = M[r][col] / M[col][col];
+      for (let c = col; c < 4; c++) M[r][c] -= f * M[col][c];
+    }
+  }
+  const c0 = M[0][3] / (M[0][0] || 1), c1 = M[1][3] / (M[1][1] || 1), c2 = M[2][3] / (M[2][2] || 1);
+  const trendAt = i => c0 + c1 * i + c2 * i * i;
+  const steps = (n - 1) * 6 || 1;
+  const trendLine = Array.from({length: steps + 1}, (_, k) => {
+    const i = (k / steps) * (n - 1);
+    return `${xAt(i)},${yAt(trendAt(i))}`;
+  }).join(' L ');
   const bars = items.map(it => {
     const good = it.value <= meta;
     const color = good ? 'var(--good)' : 'var(--bad)';
     const h = Math.max(2, (it.value / max) * 100).toFixed(1);
     return `<div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px">
-      <span style="font-size:11px;font-weight:800;color:${color};white-space:nowrap">${(it.value * 100).toFixed(1)}%</span>
+      <span style="font-size:14px;font-weight:800;color:${color};white-space:nowrap">${(it.value * 100).toFixed(1)}%</span>
       <div style="width:56%;background:${color};border-radius:4px 4px 2px 2px;height:${h}%"></div>
     </div>`;
   }).join('');
-  const labels = items.map(it => `<div style="flex:1;min-width:0;text-align:center;font-size:10.5px;font-weight:600;color:var(--ink-soft);overflow:hidden;white-space:nowrap">${it.label}</div>`).join('');
-  const yLabels = ticks.map(t => `<div style="font-size:9.5px;color:var(--ink-soft);line-height:1">${(t * 100).toFixed(0)}%</div>`).join('');
+  const labels = items.map(it => `<div style="flex:1;min-width:0;text-align:center;font-size:12.5px;font-weight:600;color:var(--ink-soft);overflow:hidden;white-space:nowrap">${it.label}</div>`).join('');
+  const yLabels = ticks.map(t => `<div style="font-size:12px;font-weight:600;color:var(--ink-soft);line-height:1">${(t * 100).toFixed(0)}%</div>`).join('');
   return `<div style="display:flex;gap:8px;height:${height}px">
     <div style="display:flex;flex-direction:column;justify-content:space-between;text-align:right;flex:none;padding-bottom:2px">${yLabels}</div>
     <div style="flex:1;min-width:0;position:relative">
-      <div style="position:absolute;left:0;right:0;top:${metaTop.toFixed(1)}%;border-top:1px dashed var(--ink-soft);opacity:.55"></div>
+      <div style="position:absolute;left:0;right:0;top:${metaTop.toFixed(1)}%;border-top:1.5px dashed var(--good);opacity:.7"></div>
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">
+        <polyline points="${trendLine}" fill="none" stroke="var(--bad)" stroke-width="0.6" stroke-dasharray="2.5 2" vector-effect="non-scaling-stroke"/>
+      </svg>
       <div style="display:flex;align-items:flex-end;height:100%;gap:8px;position:relative">${bars}</div>
     </div>
   </div>
@@ -252,17 +337,17 @@ function dailyChart({items, meta, upToSerial, height = 200, days = 15}) {
     const color = good ? 'var(--good)' : 'var(--bad)';
     const h = Math.max(2, (it.value / max) * 100).toFixed(1);
     return `<div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:5px">
-      <span style="font-size:10px;font-weight:800;color:${color};white-space:nowrap">${(it.value * 100).toFixed(1)}%</span>
+      <span style="font-size:13px;font-weight:800;color:${color};white-space:nowrap">${(it.value * 100).toFixed(1)}%</span>
       <div style="width:62%;background:${color};border-radius:3px 3px 1px 1px;height:${h}%"></div>
     </div>`;
   }).join('');
   const labels = shown.map(it => {
     const d = excelToDate(it.serial);
-    const dd = String(d.getDate()).padStart(2, '0');
-    const mmmm = d.toLocaleDateString('es-ES', {month: 'long'});
-    return `<div style="flex:1;min-width:0;display:flex;justify-content:center"><span style="font-size:8.5px;font-weight:600;color:var(--ink-soft);white-space:nowrap;display:inline-block;transform:rotate(-40deg);transform-origin:top center">${dd}-${mmmm}</span></div>`;
+    const dd = String(d.getUTCDate()).padStart(2, '0');
+    const mmmm = d.toLocaleDateString('es-ES', {month: 'long', timeZone: 'UTC'});
+    return `<div style="flex:1;min-width:0;text-align:center;font-size:11.5px;font-weight:600;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${dd}-${mmmm}</div>`;
   }).join('');
-  const yLabels = ticks.map(t => `<div style="font-size:9.5px;color:var(--ink-soft);line-height:1">${(t * 100).toFixed(0)}%</div>`).join('');
+  const yLabels = ticks.map(t => `<div style="font-size:12px;font-weight:600;color:var(--ink-soft);line-height:1">${(t * 100).toFixed(0)}%</div>`).join('');
   return `<div style="display:flex;gap:8px;height:${height}px">
     <div style="display:flex;flex-direction:column;justify-content:space-between;text-align:right;flex:none;padding-bottom:2px">${yLabels}</div>
     <div style="flex:1;min-width:0;position:relative">
@@ -271,6 +356,78 @@ function dailyChart({items, meta, upToSerial, height = 200, days = 15}) {
     </div>
   </div>
   <div style="display:flex;gap:6px;margin-top:12px;margin-left:34px">${labels}</div>`;
+}
+
+function buildDiarioDynamic(meta, rechazos, diaria, daySerials) {
+  const daySet = new Set(daySerials);
+  const dayRows = diaria.filter(r => daySet.has(r.FECHA));
+  const kgBuenos = dayRows.reduce((s, r) => s + (Number(r.KILOS_BUENOS) || 0), 0);
+  const kgMalos = dayRows.reduce((s, r) => s + (Number(r.KILOS_MALOS) || 0), 0);
+  const rateDia = kgBuenos > 0 ? kgMalos / kgBuenos : 0;
+  const rechazosDia = rechazos.filter(r => daySet.has(r['FECHA RECHAZO']));
+  const totalKgDia = rechazosDia.reduce((s, r) => s + (Number(r.KILOS) || 0), 0);
+  const causasDia = aggBy(rechazosDia, 'CAUSA').slice(0, CFG.topCausas || 8);
+  const causasDiaMax = causasDia[0]?.[1] || 1;
+  const areaDia = aggBy(rechazosDia, 'ÁREA RESP.');
+  const areaDiaTotal = areaDia.reduce((s, a) => s + a[1], 0) || 1;
+  const topAreaDia = areaDia[0];
+  const lotesDia = [...rechazosDia].sort((a, b) => b.KILOS - a.KILOS).slice(0, CFG.topLotes || 10);
+  return `
+    <div class="kpis cols-4">
+      <div class="kpi beacon ${rateDia <= meta ? 'on-good' : 'on-bad'}" style="display:flex;flex-direction:column;height:100%"><span class="led ${rateDia <= meta ? 'good' : 'bad'}"></span><span class="glyph">%</span>
+        <div class="label" style="color:var(--bad)">% de kilos rechazados</div>
+        <div class="value ${rateDia <= meta ? 'good' : 'bad'}" style="margin-top:6px">${fmtPct(rateDia)}</div>
+        <div class="foot" style="margin-top:8px"><span class="pill ${rateDia <= meta ? 'good' : 'bad'}">${rateDia <= meta ? 'Dentro de meta' : 'Fuera de meta'}</span></div>
+        <div class="foot" style="margin-top:6px">Meta: ${fmtPct(meta)} · Diferencia: <b style="color:${rateDia <= meta ? 'var(--good)' : 'var(--bad)'}">${rateDia > meta ? '+' : ''}${((rateDia - meta) * 100).toFixed(1)} pts</b></div>
+        <div class="semaforo" style="margin-top:auto"><span class="z" style="width:50%;background:var(--good)"></span><span class="z" style="width:25%;background:oklch(80% 0.15 90)"></span><span class="z" style="width:25%;background:var(--bad)"></span><span class="pin" style="left:${Math.min(96, rateDia / (meta * 2) * 100).toFixed(0)}%"></span></div>
+      </div>
+      <div class="kpi beacon on-bad" style="display:flex;flex-direction:column;height:100%;gap:14px;position:relative"><span class="led bad"></span><span class="glyph">⚖</span>
+        <div style="display:flex;gap:14px;align-items:center">
+          <div style="width:46px;height:46px;border-radius:50%;background:var(--bad-soft);color:var(--bad);display:grid;place-items:center;font-weight:800;font-size:12px;flex:none">KG</div>
+          <div style="flex:1;min-width:0"><div class="label" style="color:var(--ink-soft)">Impacto del día</div><div style="font-size:12.5px;font-weight:700;margin-top:2px">Kilos rechazados</div><div class="value bad" style="margin-top:4px">${fmtKg(totalKgDia)}</div><div class="foot">${rechazosDia.length} lotes rechazados · ${(totalKgDia / (rechazosDia.length || 1)).toFixed(0)} kg/lote prom.</div></div>
+        </div>
+        <div class="semaforo" style="margin-top:auto"><span class="z" style="width:50%;background:var(--good)"></span><span class="z" style="width:25%;background:oklch(80% 0.15 90)"></span><span class="z" style="width:25%;background:var(--bad)"></span><span class="pin" style="left:${Math.min(96, rateDia / (meta * 2) * 100).toFixed(0)}%"></span></div>
+      </div>
+      <div class="kpi beacon on-bad" style="display:flex;flex-direction:column;height:100%;border-left:3px solid var(--bad)"><span class="led bad"></span><span class="glyph">⚠</span>
+        <div class="label" style="color:var(--bad)">Principal área afectada</div>
+        <div class="value" style="font-size:32px;margin-top:6px">${topAreaDia ? topAreaDia[0] : '—'}</div>
+        <div class="foot" style="margin-top:8px">${topAreaDia ? fmtKg(topAreaDia[1]) : ''}${topAreaDia ? ` · ${(topAreaDia[1] / areaDiaTotal * 100).toFixed(1)}%` : ''}</div>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px">${areaDia.slice(1, 3).map(a => `<div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-soft)"><span>${a[0]}</span><span style="font-weight:700">${fmtKg(a[1])} · ${(a[1] / areaDiaTotal * 100).toFixed(0)}%</span></div>`).join('')}</div>
+        <div class="semaforo" style="margin-top:auto"><span class="z" style="width:50%;background:var(--good)"></span><span class="z" style="width:25%;background:oklch(80% 0.15 90)"></span><span class="z" style="width:25%;background:var(--bad)"></span><span class="pin" style="left:${topAreaDia ? Math.min(96, (topAreaDia[1] / areaDiaTotal * 100)).toFixed(0) : 0}%"></span></div>
+      </div>
+      <div class="kpi" style="display:flex;flex-direction:column;gap:10px;position:relative">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="width:48px;height:48px;border-radius:11px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:22px;flex:none">▤</div>
+          <div><div class="value" style="font-size:38px;line-height:1">${rechazosDia.length}</div><div class="foot">Lotes rechazados</div></div>
+        </div>
+        <div style="border-top:1px solid var(--line);padding-top:8px">
+          <div class="label" style="font-size:9.5px">Top 3 por kilos — cliente / tela</div>
+          <div style="display:flex;flex-direction:column;gap:5px;margin-top:5px">
+            ${lotesDia.slice(0, 3).map(r => `<div style="display:flex;justify-content:space-between;gap:6px;font-size:10.5px"><span style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">${clean(r.CLIENTE)} · ${clean(r.TELA)}</span><span style="font-weight:800;color:var(--bad);flex:none">${Number(r.KILOS).toFixed(0)} kg</span></div>`).join('') || '<span style="font-size:10.5px;color:var(--ink-soft)">Sin lotes este día</span>'}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-head"><div><h2>Causas del día</h2><p class="desc">Top ${causasDia.length} por kilos</p></div></div>
+        <div class="rank">${causasDia.map((c, i) => `<div class="rank-row"><span class="n">${i + 1}</span><div><span class="name">${c[0]}</span><div class="track"><i style="width:${(c[1] / causasDiaMax * 100).toFixed(0)}%"></i></div></div><span class="kg">${fmtKg(c[1])}</span></div>`).join('') || '<span style="font-size:11.5px;color:var(--ink-soft)">Sin causas registradas este día</span>'}</div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h2>Rechazos por área — día</h2><p class="desc">Distribución de kilos rechazados por área responsable</p></div></div>
+        <div class="donut-wrap">
+          <div class="donut" style="${donut(areaDia, areaDiaTotal)}"><div class="donut-center"><b>${fmtKg(areaDiaTotal).replace(' kg','')}</b><span>kg del día</span></div></div>
+          <div class="arealegend">${areaDia.map((a, i) => `<div class="area-row"><span class="dot" style="background:${AREA_COLORS[i % AREA_COLORS.length]}"></span><span class="name">${a[0]}</span><span class="pct">${(a[1] / areaDiaTotal * 100).toFixed(0)}%</span></div><div class="track" style="margin:-4px 0 2px"><i style="width:${(a[1] / areaDiaTotal * 100).toFixed(0)}%;background:${AREA_COLORS[i % AREA_COLORS.length]}"></i></div>`).join('') || '<span style="font-size:11.5px;color:var(--ink-soft)">Sin datos</span>'}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div><h2>Lotes con mayor rechazo</h2><p class="desc">Top ${lotesDia.length} del día por kilos</p></div></div>
+      <table>
+        <thead><tr><th>Fecha</th><th>CPOP</th><th>Lote</th><th>Cliente</th><th>Área</th><th>Tipo de tela</th><th>Composición</th><th>Causa</th><th>Turno</th><th style="text-align:right">Kg</th></tr></thead>
+        <tbody>${lotesDia.map(r => `<tr><td>${fmtDate(r['FECHA RECHAZO'])}</td><td>${clean(r.CPOP)}</td><td>${clean(r.BACH)}</td><td>${clean(r.CLIENTE)}</td><td>${clean(r['ÁREA RESP.'])}</td><td>${clean(r.TELA)}</td><td>${clean(r.TELA)}</td><td>${clean(r.CAUSA)}</td><td>${clean(r.TURNO)}</td><td class="num">${Number(r.KILOS).toFixed(0)}</td></tr>`).join('') || '<tr><td colspan="10" style="text-align:center;color:var(--ink-soft)">Sin lotes rechazados este día</td></tr>'}</tbody>
+      </table>
+    </div>`;
 }
 
 function donut(entries, total) {
@@ -313,27 +470,47 @@ function render(data) {
       <div><h1>Tablero de rechazos ATS</h1><p class="subtitle">Tasa de rechazo (kg rechazados / kg liberados) vs. meta ≤ ${fmtPct(meta)} — año ${CFG.year || curMonth.AÑO}</p></div>
       <div class="updated"><span>⟳</span><span>Última actualización<b>${lastUpdate ? fmtDate(lastUpdate, {day:'2-digit', month:'2-digit', year:'numeric'}) : '—'}</b></span></div>
     </div>
-    <div class="kpis">
+    <div class="kpis cols-5">
       <div class="kpi beacon ${ytdRate <= meta ? 'on-good' : 'on-bad'}"><span class="led ${ytdRate <= meta ? 'good' : 'bad'}"></span><span class="glyph">%</span><div class="label">Tasa de rechazo YTD</div><div class="value ${ytdRate <= meta ? 'good' : 'bad'}">${fmtPct(ytdRate)}</div><div class="foot"><span class="pill ${ytdRate <= meta ? 'good' : 'bad'}">${ytdRate <= meta ? 'Dentro de meta' : 'Fuera de meta'}</span></div>
+        <div class="foot" style="margin-top:6px">Kilos rechazados: <b style="color:var(--bad)">${fmtKg(ytdMalos)}</b></div>
         <div class="semaforo"><span class="z" style="width:50%;background:var(--good)"></span><span class="z" style="width:25%;background:oklch(80% 0.15 90)"></span><span class="z" style="width:25%;background:var(--bad)"></span><span class="pin" style="left:${Math.min(96, ytdRate / (meta * 2) * 100).toFixed(0)}%"></span></div>
       </div>
       <div class="kpi beacon on-good" style="animation:none"><span class="led good"></span><span class="glyph">✓</span><div class="label">Mejor mes</div><div class="value good">${fmtPct(best['%_RECHAZO_S_BUENOS'])}</div><div class="foot">${best.MES_NOMBRE}</div>
+        <div class="foot" style="margin-top:6px">Meta: ${fmtPct(meta)} · Diferencia: <b style="color:var(--good)">${((best['%_RECHAZO_S_BUENOS'] - meta) * 100).toFixed(1)} pts</b></div>
         <div class="semaforo"><span class="z" style="width:50%;background:var(--good)"></span><span class="z" style="width:25%;background:oklch(80% 0.15 90)"></span><span class="z" style="width:25%;background:var(--bad)"></span><span class="pin" style="left:${Math.min(96, best['%_RECHAZO_S_BUENOS'] / (meta * 2) * 100).toFixed(0)}%"></span></div>
       </div>
       <div class="kpi beacon on-bad" style="animation:none"><span class="led bad"></span><span class="glyph">!</span><div class="label">Peor mes</div><div class="value bad">${fmtPct(worst['%_RECHAZO_S_BUENOS'])}</div><div class="foot">${worst.MES_NOMBRE}</div>
+        <div class="foot" style="margin-top:6px">Meta: ${fmtPct(meta)} · Diferencia: <b style="color:var(--bad)">+${((worst['%_RECHAZO_S_BUENOS'] - meta) * 100).toFixed(1)} pts</b></div>
         <div class="semaforo"><span class="z" style="width:50%;background:var(--good)"></span><span class="z" style="width:25%;background:oklch(80% 0.15 90)"></span><span class="z" style="width:25%;background:var(--bad)"></span><span class="pin" style="left:${Math.min(96, worst['%_RECHAZO_S_BUENOS'] / (meta * 2) * 100).toFixed(0)}%"></span></div>
       </div>
-      <div class="kpi"><span class="glyph" style="position:absolute;right:-10px;bottom:-14px;font-size:74px;line-height:1;opacity:.07;pointer-events:none">⚖</span><div class="label">Kilos rechazados YTD</div><div class="value">${fmtKg(ytdMalos)}</div><div class="foot">sobre ${fmtKg(ytdBuenos)} liberados</div></div>
+      <div class="kpi beacon ${curMonth['%_RECHAZO_S_BUENOS'] <= meta ? 'on-good' : 'on-bad'}"><span class="led ${curMonth['%_RECHAZO_S_BUENOS'] <= meta ? 'good' : 'bad'}"></span><span class="glyph">◷</span><div class="label">Desempeño del mes actual</div><div class="value ${curMonth['%_RECHAZO_S_BUENOS'] <= meta ? 'good' : 'bad'}">${fmtPct(curMonth['%_RECHAZO_S_BUENOS'])}</div><div class="foot">${curMonth.MES_NOMBRE}</div>
+        <div class="foot" style="margin-top:6px">Meta: ${fmtPct(meta)} · Diferencia: <b style="color:${curMonth['%_RECHAZO_S_BUENOS'] <= meta ? 'var(--good)' : 'var(--bad)'}">${curMonth['%_RECHAZO_S_BUENOS'] > meta ? '+' : ''}${((curMonth['%_RECHAZO_S_BUENOS'] - meta) * 100).toFixed(1)} pts</b></div>
+        <div class="semaforo"><span class="z" style="width:50%;background:var(--good)"></span><span class="z" style="width:25%;background:oklch(80% 0.15 90)"></span><span class="z" style="width:25%;background:var(--bad)"></span><span class="pin" style="left:${Math.min(96, curMonth['%_RECHAZO_S_BUENOS'] / (meta * 2) * 100).toFixed(0)}%"></span></div>
+      </div>
+      <div class="kpi" style="display:flex;flex-direction:column;gap:10px;position:relative">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="width:48px;height:48px;border-radius:11px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:22px;flex:none">⚖</div>
+          <div><div class="value" style="font-size:32px;line-height:1">${fmtKg(ytdMalos)}</div><div class="foot">sobre ${fmtKg(ytdBuenos)} liberados</div></div>
+        </div>
+        <div style="border-top:1px solid var(--line);padding-top:8px">
+          <div class="label" style="font-size:9.5px">Top 3 meses por kilos rechazados</div>
+          <div style="display:flex;flex-direction:column;gap:5px;margin-top:5px">
+            ${[...mensual].sort((a, b) => b.KILOS_MALOS - a.KILOS_MALOS).slice(0, 3).map(m => `<div style="display:flex;justify-content:space-between;gap:6px;font-size:10.5px"><span style="font-weight:700">${m.MES_NOMBRE}</span><span style="font-weight:800;color:var(--bad)">${fmtKg(m.KILOS_MALOS)}</span></div>`).join('')}
+          </div>
+        </div>
+      </div>
     </div>
     <div class="card full" style="margin-bottom:14px">
       <div class="card-head"><div><h2>% de rechazo mensual</h2><p class="desc">Kilos rechazados ÷ kilos de tela liberada, por mes</p></div><span class="badge">Meta ≤ ${fmtPct(meta)}</span></div>
       <div style="height:240px">${barChart({items: mensual.map(r => ({label: r.MES_NOMBRE.slice(0,3), value: r['%_RECHAZO_S_BUENOS']})), meta, height: 220})}</div>
-      <div class="legend"><span><i class="dot good"></i>Dentro de meta</span><span><i class="dot bad"></i>Fuera de meta</span></div>
+      <p style="text-align:center;font-size:11px;color:var(--ink-soft);margin:10px 0 0">Cálculo: kg rechazados del mes ÷ kg de tela liberada del mes × 100</p>
+      <div class="legend" style="flex-wrap:nowrap;white-space:nowrap;overflow-x:auto"><span><i class="dot good"></i>Dentro de meta</span><span><i class="dot bad"></i>Fuera de meta</span><span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:0;border-top:2px dashed var(--bad);display:inline-block"></i>Línea de tendencia</span><span style="color:var(--ink-soft)">Lectura ejecutiva: <b style="color:var(--good)">verde</b>=aceptable · <b style="color:var(--bad)">rojo</b>=requiere atención</span></div>
     </div>
     <div class="grid2">
       <div class="card">
-        <div class="card-head"><div><h2>% de rechazo semanal</h2><p class="desc">Últimas ${semanal.length} semanas con datos</p></div></div>
-        <div style="height:220px">${barChart({items: semanal.slice(-12).map(r => ({label: 'S' + r.SEMANA_ISO, value: r['%_RECHAZO_S_BUENOS']})), meta, height: 190})}</div>
+        <div class="card-head"><div><h2>% de rechazo semanal</h2><p class="desc">Últimas ${Math.min(12, semanal.length)} semanas con datos</p></div></div>
+        <div style="height:220px">${lineChart({items: semanal.slice(-12).map(r => ({label: 'S' + r.SEMANA_ISO, value: r['%_RECHAZO_S_BUENOS']})), meta, height: 190})}</div>
+        <div class="legend"><span><i class="dot good"></i>Dentro de meta ≤ ${fmtPct(meta)}</span><span><i class="dot bad"></i>Fuera de meta</span></div>
       </div>
       <div class="card">
         <div class="card-head"><div><h2>Rechazos por área</h2><p class="desc">Distribución de kilos, acumulado del año</p></div></div>
@@ -343,69 +520,58 @@ function render(data) {
         </div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-head"><div><h2>Principales causas de rechazo</h2><p class="desc">Top ${causasYtd.length} por kilos, acumulado del año</p></div></div>
-      <div class="rank">${causasYtd.map((c, i) => `<div class="rank-row"><span class="n">${i + 1}</span><div><span class="name">${c[0]}</span><div class="track"><i style="width:${(c[1] / causasMaxKg * 100).toFixed(0)}%"></i></div></div><span class="kg">${fmtKg(c[1])}</span></div>`).join('')}</div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-head"><div><h2>Principales causas de rechazo</h2><p class="desc">Top ${causasYtd.length} por kilos, acumulado del año</p></div></div>
+        <div class="rank">${causasYtd.map((c, i) => `<div class="rank-row"><span class="n">${i + 1}</span><div><span class="name">${c[0]}</span><div class="track"><i style="width:${(c[1] / causasMaxKg * 100).toFixed(0)}%"></i></div></div><span class="kg">${fmtKg(c[1])}</span></div>`).join('')}</div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h2>Lotes con mayor rechazo</h2><p class="desc">Top 10 del año por kilos</p></div></div>
+        <table>
+          <thead><tr><th>Fecha</th><th>Batch</th><th>Cliente</th><th>Tipo de tela</th><th>Construcción</th><th style="text-align:right">Kg</th></tr></thead>
+          <tbody>${[...rechazos].sort((a, b) => b.KILOS - a.KILOS).slice(0, 10).map(r => `<tr><td>${fmtDate(r['FECHA RECHAZO'])}</td><td>${clean(r.BACH)}</td><td>${clean(r.CLIENTE)}</td><td>${clean(r.TELA)}</td><td>${clean(r.TELA)}</td><td class="num">${Number(r.KILOS).toFixed(0)}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>
     </div>
   </section>
 
   <section class="view" id="view-diario">
     <div class="topbar">
       <div><h1>Tablero de rechazos ATS</h1><p class="subtitle">Desempeño diario frente a la meta ≤ ${fmtPct(meta)}</p></div>
-      <div class="updated"><span>⟳</span><span>Corte al día<b>${fmtDate(lastDaySerial, {day:'2-digit', month:'2-digit', year:'numeric'})}</b></span></div>
-    </div>
-    <div class="kpis">
-      <div class="kpi" style="display:flex;gap:14px;align-items:center;border-left:3px solid var(--bad)">
-        <div style="width:46px;height:46px;border-radius:50%;background:var(--bad-soft);color:var(--bad);display:grid;place-items:center;font-weight:800;font-size:12px;flex:none">KG</div>
-        <div><div class="label" style="color:var(--bad)">Impacto del día</div><div style="font-size:12.5px;font-weight:700;margin-top:2px">Kilos rechazados</div><div class="value bad" style="margin-top:4px">${fmtKg(totalLotesMesKg)}</div><div class="foot">${rechazosMes.length} lotes rechazados</div></div>
-      </div>
-      <div class="kpi" style="border-left:3px solid var(--bad)">
-        <div class="label" style="color:var(--bad)">% de kilos rechazados</div>
-        <div class="value ${curMonth['%_RECHAZO_S_BUENOS'] <= meta ? 'good' : 'bad'}" style="margin-top:6px">${fmtPct(curMonth['%_RECHAZO_S_BUENOS'])}</div>
-        <div class="foot" style="margin-top:8px"><span class="pill ${curMonth['%_RECHAZO_S_BUENOS'] <= meta ? 'good' : 'bad'}">${curMonth['%_RECHAZO_S_BUENOS'] <= meta ? 'Dentro de meta' : 'Fuera de meta'}</span></div>
-      </div>
-      <div class="kpi" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px">
-        <div style="width:34px;height:34px;border-radius:9px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:16px">▤</div>
-        <div class="value" style="font-size:26px">${rechazosMes.length}</div>
-        <div class="foot" style="line-height:1.2">Lotes<br>rechazados</div>
-      </div>
-      <div class="kpi" style="border-left:3px solid var(--bad)">
-        <div class="label" style="color:var(--bad)">Principal área afectada</div>
-        <div class="value" style="font-size:19px;margin-top:6px">${topArea ? topArea[0] : '—'}</div>
-        <div class="foot" style="margin-top:8px">${topArea ? fmtKg(topArea[1]) : ''}${topArea ? ` · ${(topArea[1] / areaMesTotal * 100).toFixed(1)}%` : ''}</div>
-        <div class="track" style="margin-top:6px"><i style="width:${topArea ? (topArea[1] / areaMesTotal * 100).toFixed(0) : 0}%;background:var(--bad)"></i></div>
-      </div>
-    </div>
-    <div class="grid2">
-      <div class="card">
-        <div class="card-head"><div><h2>Causas del mes</h2><p class="desc">Top ${causasMes.length} por kilos</p></div></div>
-        <div class="rank">${causasMes.map((c, i) => `<div class="rank-row"><span class="n">${i + 1}</span><div><span class="name">${c[0]}</span><div class="track"><i style="width:${(c[1] / causasMesMax * 100).toFixed(0)}%"></i></div></div><span class="kg">${fmtKg(c[1])}</span></div>`).join('')}</div>
-      </div>
-      <div class="card">
-        <div class="card-head"><div><h2>Rechazos por área — mes</h2></div></div>
-        <div class="donut-wrap">
-          <div class="donut" style="${donut(areaMes, areaMesTotal)}"><div class="donut-center"><b>${fmtKg(areaMesTotal).replace(' kg','')}</b><span>kg del mes</span></div></div>
-          <div class="arealegend">${areaMes.map((a, i) => `<div class="area-row"><span class="dot" style="background:${AREA_COLORS[i % AREA_COLORS.length]}"></span><span class="name">${a[0]}</span><span class="pct">${(a[1] / areaMesTotal * 100).toFixed(0)}%</span></div>`).join('')}</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:11.5px;font-weight:700;color:var(--ink-soft)">Día(s):</span>
+        <div style="position:relative">
+          <button id="diaBtn" onclick="document.getElementById('diaMenu').style.display = document.getElementById('diaMenu').style.display === 'block' ? 'none' : 'block'" style="font-family:inherit;font-size:12.5px;font-weight:700;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 12px;cursor:pointer;display:flex;align-items:center;gap:8px">
+            <span id="diaBtnLabel">${fmtDate(lastDaySerial, {day:'2-digit', month:'long'})}</span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div id="diaMenu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;z-index:20;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);max-height:280px;overflow-y:auto;min-width:190px">
+            ${diaria.map(r => `<label data-dia="${r.FECHA}" style="display:flex;align-items:center;gap:8px;padding:8px 14px;font-size:12.5px;font-weight:500;color:var(--ink);cursor:pointer" onmouseover="this.style.background='var(--accent-soft)'" onmouseout="this.style.background=''"><input type="checkbox" value="${r.FECHA}" ${r.FECHA === lastDaySerial ? 'checked' : ''} onchange="onDiaToggle()" style="cursor:pointer">${fmtDate(r.FECHA, {day:'2-digit', month:'long'})}</label>`).join('')}
+          </div>
         </div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-head"><div><h2>Lotes con mayor rechazo</h2><p class="desc">Top ${lotesMes.length} del mes por kilos</p></div></div>
-      <table>
-        <thead><tr><th>Fecha</th><th>CPOP</th><th>Cliente</th><th>Área</th><th>Causa</th><th>Turno</th><th style="text-align:right">Kg</th></tr></thead>
-        <tbody>${lotesMes.map(r => `<tr><td>${fmtDate(r['FECHA RECHAZO'])}</td><td>${clean(r.CPOP)}</td><td>${clean(r.CLIENTE)}</td><td>${clean(r['ÁREA RESP.'])}</td><td>${clean(r.CAUSA)}</td><td>${clean(r.TURNO)}</td><td class="num">${Number(r.KILOS).toFixed(0)}</td></tr>`).join('')}</tbody>
-      </table>
-    </div>
+    <div id="diario-dynamic">${buildDiarioDynamic(meta, rechazos, diaria, [lastDaySerial])}</div>
     <div class="card full">
       <div class="card-head"><div><h2>% de rechazo diario</h2><p class="desc">Kilos rechazados ÷ kilos liberados, por día del mes</p></div><span class="badge">Meta ≤ ${fmtPct(meta)}</span></div>
-      <div style="display:flex;gap:8px">
-        <div style="display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:10.5px;font-weight:600;color:var(--ink-soft);white-space:nowrap">% de rechazo (kg malos / kg buenos)</div>
-        <div style="flex:1;min-width:0">${dailyChart({items: diaria.map(r => ({serial: r.FECHA, value: r['%_RECHAZO_S_BUENOS']})), meta, upToSerial: lastDaySerial, height: 220})}</div>
-      </div>
+      <div>${dailyChart({items: diaria.map(r => ({serial: r.FECHA, value: r['%_RECHAZO_S_BUENOS']})), meta, upToSerial: lastDaySerial, height: 220})}</div>
+      <p style="text-align:center;font-size:11px;color:var(--ink-soft);margin:10px 0 0">Cálculo: kg rechazados del día ÷ kg liberados del día × 100</p>
       <div class="legend"><span><i class="dot good"></i>Dentro de meta</span><span><i class="dot bad"></i>Fuera de meta</span><span><i class="dot pending"></i>Sin datos aún</span></div>
     </div>
   </section>`;
 
+  window.onDiaToggle = () => {
+    const checked = [...document.querySelectorAll('#diaMenu input:checked')].map(c => Number(c.value)).sort((a, b) => a - b);
+    const days = checked.length ? checked : [lastDaySerial];
+    document.getElementById('diario-dynamic').innerHTML = buildDiarioDynamic(meta, rechazos, diaria, days);
+    document.getElementById('diaBtnLabel').textContent = days.length === 1
+      ? fmtDate(days[0], {day:'2-digit', month:'long'})
+      : `${days.length} días seleccionados`;
+  };
+  document.addEventListener('click', (e) => {
+    const menu = document.getElementById('diaMenu');
+    if (menu && menu.style.display === 'block' && !menu.contains(e.target) && e.target.id !== 'diaBtn' && !e.target.closest('#diaBtn')) menu.style.display = 'none';
+  });
   document.querySelectorAll('nav.nav button').forEach(btn => btn.onclick = () => {
     document.querySelectorAll('nav.nav button').forEach(b => b.classList.toggle('active', b === btn));
     document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + btn.dataset.view));
