@@ -343,9 +343,9 @@ function dailyChart({items, meta, upToSerial, height = 200, days = 15}) {
   }).join('');
   const labels = shown.map(it => {
     const d = excelToDate(it.serial);
-    const dd = String(d.getUTCDate()).padStart(2, '0');
-    const mmmm = d.toLocaleDateString('es-ES', {month: 'long', timeZone: 'UTC'});
-    return `<div style="flex:1;min-width:0;text-align:center;font-size:11.5px;font-weight:600;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${dd}-${mmmm}</div>`;
+    const dd = String(d.getUTCDate());
+    const mmm = d.toLocaleDateString('es-ES', {month: 'short', timeZone: 'UTC'}).replace('.', '');
+    return `<div style="flex:1;min-width:0;text-align:center;font-size:8px;font-weight:700;color:var(--ink-soft);white-space:nowrap;overflow:visible">${dd}-${mmm}</div>`;
   }).join('');
   const yLabels = ticks.map(t => `<div style="font-size:12px;font-weight:600;color:var(--ink-soft);line-height:1">${(t * 100).toFixed(0)}%</div>`).join('');
   return `<div style="display:flex;gap:8px;height:${height}px">
