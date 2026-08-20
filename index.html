@@ -32,7 +32,13 @@
   a{color:var(--accent)}
   a:hover{color:oklch(46% 0.16 255)}
   .app{display:flex;min-height:100vh}
-  .side{width:232px;flex:none;background:oklch(20% 0.025 255);color:#fff;padding:22px 16px;display:flex;flex-direction:column;gap:28px}
+  .side{width:232px;flex:none;background:oklch(20% 0.025 255);color:#fff;padding:22px 16px;display:flex;flex-direction:column;gap:28px;transition:width .2s ease,padding .2s ease;position:relative}
+  .side.collapsed{width:76px;padding:22px 10px}
+  .side.collapsed .brand .txt,.side.collapsed nav.nav button span,.side.collapsed .side-foot{display:none}
+  .side.collapsed .brand{justify-content:center}
+  .side.collapsed nav.nav button{justify-content:center}
+  .side-toggle{all:unset;cursor:pointer;position:absolute;top:22px;right:-12px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;box-shadow:var(--shadow);transition:transform .2s ease}
+  .side.collapsed .side-toggle{transform:rotate(180deg)}
   .brand{display:flex;align-items:center;gap:11px;padding:0 4px}
   .brand .mark{width:34px;height:34px;border-radius:9px;background:var(--accent);display:grid;place-items:center;font-weight:800;font-size:14px;flex:none}
   .brand .txt{font-size:13px;font-weight:700;letter-spacing:.02em;line-height:1.25}
@@ -96,7 +102,21 @@
   tbody td.num{text-align:right;font-weight:700;color:var(--bad)}
   tbody tr:last-child td{border-bottom:0}
   .note{margin-top:12px;background:var(--accent-soft);border-radius:10px;padding:10px 13px;font-size:11.5px;color:oklch(38% 0.1 255)}
-  .full{grid-column:1/-1}
+  @keyframes glowBad{0%,100%{box-shadow:0 0 0 0 oklch(58% 0.18 25 / .45),var(--shadow)}50%{box-shadow:0 0 0 7px oklch(58% 0.18 25 / 0),var(--shadow)}}
+  @keyframes glowGood{0%,100%{box-shadow:0 0 0 0 oklch(56% 0.13 152 / .4),var(--shadow)}50%{box-shadow:0 0 0 7px oklch(56% 0.13 152 / 0),var(--shadow)}}
+  .kpi.beacon{position:relative;overflow:hidden;border-width:2px}
+  .kpi.beacon.on-bad{border-color:var(--bad);animation:glowBad 2.2s ease-in-out infinite}
+  .kpi.beacon.on-good{border-color:var(--good);animation:glowGood 2.2s ease-in-out infinite}
+  .kpi.beacon .glyph{position:absolute;right:-10px;bottom:-14px;font-size:74px;line-height:1;opacity:.07;pointer-events:none}
+  .kpi.beacon .led{position:absolute;top:14px;right:14px;width:9px;height:9px;border-radius:50%}
+  .kpi.beacon .led.good{background:var(--good);box-shadow:0 0 8px 1px oklch(56% 0.13 152 / .7)}
+  .kpi.beacon .led.bad{background:var(--bad);box-shadow:0 0 8px 1px oklch(58% 0.18 25 / .7)}
+  .gauge{position:relative;height:6px;border-radius:999px;background:oklch(93% 0.006 240);margin-top:14px;overflow:visible}
+  .gauge i{display:block;height:100%;border-radius:999px}
+  .gauge .mk{position:absolute;top:-3px;width:2px;height:12px;background:var(--ink);opacity:.4}
+  .semaforo{position:relative;height:8px;border-radius:999px;margin-top:14px;display:flex;overflow:hidden}
+  .semaforo .z{height:100%}
+  .semaforo .pin{position:absolute;top:-5px;width:3px;height:18px;border-radius:2px;background:var(--ink);box-shadow:0 0 0 2px var(--panel)}
   .state{min-height:60vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--ink-soft);text-align:center;padding:40px}
   .state b{color:var(--ink);font-size:16px}
   .state code{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:2px 6px;font-size:12px}
@@ -108,7 +128,10 @@
 </head>
 <body>
 <div class="app">
-  <aside class="side">
+  <aside class="side" id="sidebar">
+    <button class="side-toggle" id="sideToggle" title="Colapsar menú">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
     <div class="brand">
       <div class="mark">QC</div>
       <div class="txt">CALIDAD TEXTIL<small>Control de rechazos</small></div>
@@ -130,6 +153,11 @@
   </main>
 </div>
 <script>
+document.getElementById('sideToggle').onclick = () => {
+  const collapsed = document.getElementById('sidebar').classList.toggle('collapsed');
+  localStorage.setItem('qc-sidebar-collapsed', collapsed ? '1' : '0');
+};
+if (localStorage.getItem('qc-sidebar-collapsed') === '1') document.getElementById('sidebar').classList.add('collapsed');
 const CFG = window.DASHBOARD_CONFIG || {};
 document.title = CFG.dashboardTitle || 'Tablero de Calidad Textil';
 
@@ -183,9 +211,16 @@ function aggBy(rows, key) {
 
 const AREA_COLORS = ['oklch(56% 0.15 255)', 'oklch(56% 0.13 152)', 'oklch(60% 0.14 70)', 'oklch(58% 0.18 25)', 'oklch(55% 0.12 300)'];
 
+function yAxisTicks(max, count = 4) {
+  const ticks = [];
+  for (let i = count; i >= 0; i--) ticks.push(max * i / count);
+  return ticks;
+}
+
 function barChart({items, meta, height = 220}) {
   const max = Math.max(meta * 1.35, ...items.map(i => i.value)) || 1;
   const metaTop = Math.max(0, Math.min(100, (1 - meta / max) * 100));
+  const ticks = yAxisTicks(max);
   const bars = items.map(it => {
     const good = it.value <= meta;
     const color = good ? 'var(--good)' : 'var(--bad)';
@@ -196,34 +231,46 @@ function barChart({items, meta, height = 220}) {
     </div>`;
   }).join('');
   const labels = items.map(it => `<div style="flex:1;min-width:0;text-align:center;font-size:10.5px;font-weight:600;color:var(--ink-soft);overflow:hidden;white-space:nowrap">${it.label}</div>`).join('');
-  return `<div style="position:relative;height:${height}px">
+  const yLabels = ticks.map(t => `<div style="font-size:9.5px;color:var(--ink-soft);line-height:1">${(t * 100).toFixed(0)}%</div>`).join('');
+  return `<div style="display:flex;gap:8px;height:${height}px">
+    <div style="display:flex;flex-direction:column;justify-content:space-between;text-align:right;flex:none;padding-bottom:2px">${yLabels}</div>
+    <div style="flex:1;min-width:0;position:relative">
       <div style="position:absolute;left:0;right:0;top:${metaTop.toFixed(1)}%;border-top:1px dashed var(--ink-soft);opacity:.55"></div>
       <div style="display:flex;align-items:flex-end;height:100%;gap:8px;position:relative">${bars}</div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:8px">${labels}</div>`;
+  </div>
+  <div style="display:flex;gap:8px;margin-top:8px;margin-left:34px">${labels}</div>`;
 }
 
-function dailyChart({items, meta, upToSerial, height = 200}) {
-  const withData = items.filter(i => i.serial <= upToSerial);
-  const max = Math.max(meta * 1.4, ...withData.map(i => i.value), 0.01);
+function dailyChart({items, meta, upToSerial, height = 200, days = 15}) {
+  const shown = items.filter(i => i.serial <= upToSerial).slice(-days);
+  const max = Math.max(meta * 1.4, ...shown.map(i => i.value), 0.01);
   const metaTop = Math.max(0, Math.min(100, (1 - meta / max) * 100));
-  const bars = items.map(it => {
-    const hasData = it.serial <= upToSerial;
+  const ticks = yAxisTicks(max);
+  const bars = shown.map(it => {
     const good = it.value <= meta;
-    const h = hasData ? Math.max(2, (it.value / max) * 100).toFixed(1) : 2;
-    const fill = !hasData ? 'var(--pending)' : (good ? 'var(--good)' : 'var(--bad)');
-    const label = hasData ? `<span style="font-size:7px;font-weight:800;color:${good ? 'var(--good)' : 'var(--bad)'};white-space:nowrap;writing-mode:vertical-rl;transform:rotate(180deg);margin-bottom:3px">${(it.value * 100).toFixed(1)}%</span>` : '';
-    return `<div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
-      ${label}
-      <div style="width:100%;margin:0 1px;background:${fill};border-radius:2px 2px 1px 1px;height:${h}%"></div>
+    const color = good ? 'var(--good)' : 'var(--bad)';
+    const h = Math.max(2, (it.value / max) * 100).toFixed(1);
+    return `<div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:5px">
+      <span style="font-size:10px;font-weight:800;color:${color};white-space:nowrap">${(it.value * 100).toFixed(1)}%</span>
+      <div style="width:62%;background:${color};border-radius:3px 3px 1px 1px;height:${h}%"></div>
     </div>`;
   }).join('');
-  const labels = items.map((it, i) => `<div style="flex:1;min-width:0;text-align:center;font-size:8px;color:var(--ink-soft)">${i % 2 === 0 ? fmtDate(it.serial, {day:'2-digit', month:'2-digit'}) : ''}</div>`).join('');
-  return `<div style="position:relative;height:${height}px">
+  const labels = shown.map(it => {
+    const d = excelToDate(it.serial);
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mmmm = d.toLocaleDateString('es-ES', {month: 'long'});
+    return `<div style="flex:1;min-width:0;display:flex;justify-content:center"><span style="font-size:8.5px;font-weight:600;color:var(--ink-soft);white-space:nowrap;display:inline-block;transform:rotate(-40deg);transform-origin:top center">${dd}-${mmmm}</span></div>`;
+  }).join('');
+  const yLabels = ticks.map(t => `<div style="font-size:9.5px;color:var(--ink-soft);line-height:1">${(t * 100).toFixed(0)}%</div>`).join('');
+  return `<div style="display:flex;gap:8px;height:${height}px">
+    <div style="display:flex;flex-direction:column;justify-content:space-between;text-align:right;flex:none;padding-bottom:2px">${yLabels}</div>
+    <div style="flex:1;min-width:0;position:relative">
       <div style="position:absolute;left:0;right:0;top:${metaTop.toFixed(1)}%;border-top:1px dashed var(--ink-soft);opacity:.55"></div>
-      <div style="display:flex;align-items:flex-end;height:100%;gap:2px;position:relative">${bars}</div>
+      <div style="display:flex;align-items:flex-end;height:100%;gap:6px;position:relative">${bars}</div>
     </div>
-    <div style="display:flex;gap:2px;margin-top:6px">${labels}</div>`;
+  </div>
+  <div style="display:flex;gap:6px;margin-top:12px;margin-left:34px">${labels}</div>`;
 }
 
 function donut(entries, total) {
@@ -267,10 +314,16 @@ function render(data) {
       <div class="updated"><span>⟳</span><span>Última actualización<b>${lastUpdate ? fmtDate(lastUpdate, {day:'2-digit', month:'2-digit', year:'numeric'}) : '—'}</b></span></div>
     </div>
     <div class="kpis">
-      <div class="kpi"><div class="label">Tasa de rechazo YTD</div><div class="value ${ytdRate <= meta ? 'good' : 'bad'}">${fmtPct(ytdRate)}</div><div class="foot"><span class="pill ${ytdRate <= meta ? 'good' : 'bad'}">${ytdRate <= meta ? 'Dentro de meta' : 'Fuera de meta'}</span></div></div>
-      <div class="kpi"><div class="label">Kilos rechazados YTD</div><div class="value">${fmtKg(ytdMalos)}</div><div class="foot">sobre ${fmtKg(ytdBuenos)} liberados</div></div>
-      <div class="kpi"><div class="label">Mejor mes</div><div class="value good">${fmtPct(best['%_RECHAZO_S_BUENOS'])}</div><div class="foot">${best.MES_NOMBRE}</div></div>
-      <div class="kpi"><div class="label">Peor mes</div><div class="value bad">${fmtPct(worst['%_RECHAZO_S_BUENOS'])}</div><div class="foot">${worst.MES_NOMBRE}</div></div>
+      <div class="kpi beacon ${ytdRate <= meta ? 'on-good' : 'on-bad'}"><span class="led ${ytdRate <= meta ? 'good' : 'bad'}"></span><span class="glyph">%</span><div class="label">Tasa de rechazo YTD</div><div class="value ${ytdRate <= meta ? 'good' : 'bad'}">${fmtPct(ytdRate)}</div><div class="foot"><span class="pill ${ytdRate <= meta ? 'good' : 'bad'}">${ytdRate <= meta ? 'Dentro de meta' : 'Fuera de meta'}</span></div>
+        <div class="semaforo"><span class="z" style="width:50%;background:var(--good)"></span><span class="z" style="width:25%;background:oklch(80% 0.15 90)"></span><span class="z" style="width:25%;background:var(--bad)"></span><span class="pin" style="left:${Math.min(96, ytdRate / (meta * 2) * 100).toFixed(0)}%"></span></div>
+      </div>
+      <div class="kpi beacon on-good" style="animation:none"><span class="led good"></span><span class="glyph">✓</span><div class="label">Mejor mes</div><div class="value good">${fmtPct(best['%_RECHAZO_S_BUENOS'])}</div><div class="foot">${best.MES_NOMBRE}</div>
+        <div class="semaforo"><span class="z" style="width:50%;background:var(--good)"></span><span class="z" style="width:25%;background:oklch(80% 0.15 90)"></span><span class="z" style="width:25%;background:var(--bad)"></span><span class="pin" style="left:${Math.min(96, best['%_RECHAZO_S_BUENOS'] / (meta * 2) * 100).toFixed(0)}%"></span></div>
+      </div>
+      <div class="kpi beacon on-bad" style="animation:none"><span class="led bad"></span><span class="glyph">!</span><div class="label">Peor mes</div><div class="value bad">${fmtPct(worst['%_RECHAZO_S_BUENOS'])}</div><div class="foot">${worst.MES_NOMBRE}</div>
+        <div class="semaforo"><span class="z" style="width:50%;background:var(--good)"></span><span class="z" style="width:25%;background:oklch(80% 0.15 90)"></span><span class="z" style="width:25%;background:var(--bad)"></span><span class="pin" style="left:${Math.min(96, worst['%_RECHAZO_S_BUENOS'] / (meta * 2) * 100).toFixed(0)}%"></span></div>
+      </div>
+      <div class="kpi"><span class="glyph" style="position:absolute;right:-10px;bottom:-14px;font-size:74px;line-height:1;opacity:.07;pointer-events:none">⚖</span><div class="label">Kilos rechazados YTD</div><div class="value">${fmtKg(ytdMalos)}</div><div class="foot">sobre ${fmtKg(ytdBuenos)} liberados</div></div>
     </div>
     <div class="card full" style="margin-bottom:14px">
       <div class="card-head"><div><h2>% de rechazo mensual</h2><p class="desc">Kilos rechazados ÷ kilos de tela liberada, por mes</p></div><span class="badge">Meta ≤ ${fmtPct(meta)}</span></div>
@@ -280,7 +333,7 @@ function render(data) {
     <div class="grid2">
       <div class="card">
         <div class="card-head"><div><h2>% de rechazo semanal</h2><p class="desc">Últimas ${semanal.length} semanas con datos</p></div></div>
-        <div style="height:200px">${barChart({items: semanal.slice(-12).map(r => ({label: 'S' + r.SEMANA_ISO, value: r['%_RECHAZO_S_BUENOS']})), meta, height: 190})}</div>
+        <div style="height:220px">${barChart({items: semanal.slice(-12).map(r => ({label: 'S' + r.SEMANA_ISO, value: r['%_RECHAZO_S_BUENOS']})), meta, height: 190})}</div>
       </div>
       <div class="card">
         <div class="card-head"><div><h2>Rechazos por área</h2><p class="desc">Distribución de kilos, acumulado del año</p></div></div>
